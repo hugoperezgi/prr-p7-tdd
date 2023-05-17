@@ -49,4 +49,10 @@ def setUpServer(ip: str='127.0.0.1', port: int=6969, mode: int=1):
     s=[setUpSock(ip,port,mode),]
     s2=setUpUnbindedSock()
     u=setUpStoredPasswords()
+    s[0].listen()
     return s,s2,u
+
+def getNewConnection(s):
+    ns,_=s.accept()
+    whateve=ns.recv(8196)
+    return ns,whateve

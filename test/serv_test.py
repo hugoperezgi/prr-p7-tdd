@@ -101,7 +101,11 @@ class TestServer(unittest.TestCase):
         self.assertIsInstance(p,dict)
 
     def test_getNewConnection(self):
-        s,helo=getNewConnection()
+        s,_,_=setUpServer()
+        temp=setUpUnbindedSock(1)
+        temp.connect(('127.0.0.1',6969))
+        temp.send(b'hello')
+        s,helo=getNewConnection(s[0])
         self.assertEqual(b'hello',helo)
         self.assertIsInstance(s,socket.socket().__class__)
 
