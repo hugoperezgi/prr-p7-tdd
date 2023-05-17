@@ -66,7 +66,10 @@ import unittest
 class TestServer(unittest.TestCase):
     
     def test_setUpSock(self):
-        self.assertIsInstance(setUpSock(),socket.socket().__class__)
+        ip='127.0.0.1'
+        port=6969
+        protocol=0
+        self.assertIsInstance(setUpSock(ip,port,protocol),socket.socket().__class__)
         
 
 if __name__ == "__main__": 
