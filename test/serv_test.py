@@ -65,6 +65,9 @@ import unittest
 
 class TestServer(unittest.TestCase):
     
+    def setUp(self) -> None:
+        self.listenSck,self.updSock,self.loggedUsers = setUpServer()
+
     def test_setUpSock(self):
         ip='127.0.0.1'
         port=6969
@@ -108,6 +111,8 @@ class TestServer(unittest.TestCase):
         s,helo=getNewConnection(s[0])
         self.assertEqual(b'hello',helo)
         self.assertIsInstance(s,socket.socket().__class__)
+
+
 
 if __name__ == "__main__": 
     unittest.main()
