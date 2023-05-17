@@ -17,6 +17,7 @@ def generateAdmin():
 
 def setUpStoredPasswords():
     loggedUsers={}
+    adminUID,adminPass=generateAdmin()
     try:
         f=open("local/users.bin","xb",0)
         f.write(adminUID+b" "+adminPass+b"\n")    
@@ -28,3 +29,5 @@ def setUpStoredPasswords():
         f.close()
         for l in ls: 
             loggedUsers[l.partition(b" ")[0]] = l.partition(b" ")[2]
+
+    return loggedUsers

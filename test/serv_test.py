@@ -78,10 +78,12 @@ class TestServer(unittest.TestCase):
 
     def test_setUpStoredPasswords(self):
         expected={}
-        hashgen=hashlib.sha512()
-        hashgen.update(b'admin#0000')
-        expected[b'admin#0000']=hashgen.digest()
+        a=generateAdmin()
+        expected[a[0]]=a[1] + b'\n'
         self.assertDictEqual(expected,setUpStoredPasswords())
+
+        with self.assertRaises(FileExistsError):
+            f=open("./local/users.bin","xb",0)
 
 if __name__ == "__main__": 
     unittest.main()
