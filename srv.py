@@ -23,21 +23,21 @@ def generateAdmin():
     return (adminUID,adminPass)
 
 def setUpStoredPasswords():
-    loggedUsers={}
+    registerdUsers={}
     adminUID,adminPass=generateAdmin()
     try:
         f=open("local/users.bin","xb",0)
         f.write(adminUID+b" "+adminPass+b"\n")    
-        loggedUsers[adminUID] = adminPass
+        registerdUsers[adminUID] = adminPass
         f.close()
     except FileExistsError:
         f=open("local/users.bin","rb",0)
         ls = f.readlines()
         f.close()
         for l in ls: 
-            loggedUsers[l.partition(b" ")[0]] = l.partition(b" ")[2]
+            registerdUsers[l.partition(b" ")[0]] = l.partition(b" ")[2]
 
-    return loggedUsers
+    return registerdUsers
 
 def saveCli(user,passw):
     '''cli user,password saved to local storage'''
@@ -48,10 +48,10 @@ def saveCli(user,passw):
 def setUpServer(ip: str='127.0.0.1', port: int=6969, mode: int=1):
     s=[setUpSock(ip,port,mode),]
     s2=setUpUnbindedSock()
-    u=setUpStoredPasswords()
+    registerdUsers=setUpStoredPasswords()
     loggedSock={}
     s[0].listen()
-    return s,s2,u,loggedSock
+    return s,s2,registerdUsers,loggedSock
 
 def getNewConnection(s):
     ns,_=s.accept()

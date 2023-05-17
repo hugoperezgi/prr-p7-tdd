@@ -66,7 +66,7 @@ import unittest
 class TestServer(unittest.TestCase):
     
     def setUp(self) -> None:
-        self.listenSck,self.updSock,self.loggedUsers = setUpServer()
+        self.listenSck,self.updSock,self.registerdUsers = setUpServer()
 
     def test_setUpSock(self):
         ip='127.0.0.1'
