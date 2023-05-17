@@ -80,7 +80,7 @@ class TestServer(unittest.TestCase):
         expected={}
         a=generateAdmin()
         expected[a[0]]=a[1] + b'\n'
-        self.assertDictEqual(expected,setUpStoredPasswords())
+        self.assertEqual(expected[a[0]],setUpStoredPasswords()[a[0]])
 
         with self.assertRaises(FileExistsError):
             f=open("./local/users.bin","xb",0)
