@@ -1,4 +1,5 @@
 import os, time, sys, socket
+import hashlib
 
 def setUpSock(ip: str='127.0.0.1', port: int=6969, mode: int=1):
     '''mode 1 = tcp; mode 0 = udp'''
@@ -7,3 +8,5 @@ def setUpSock(ip: str='127.0.0.1', port: int=6969, mode: int=1):
     s.bind((ip,port))
     return s
 
+def setUpStoredPasswords():
+    pass
