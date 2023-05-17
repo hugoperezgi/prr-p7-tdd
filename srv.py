@@ -59,4 +59,4 @@ def getNewConnection(s):
     return ns,whateve
 
 def isNewUser(sck,loggedSock):
-    return sck.fileno() in loggedSock
+    return sck.fileno() not in loggedSock

@@ -66,7 +66,7 @@ import unittest
 class TestServer(unittest.TestCase):
     
     def setUp(self) -> None:
-        self.listenSck,self.updSock,self.registerdUsers = setUpServer()
+        self.listenSck,self.updSock,self.registerdUsers,self.loggedSock = setUpServer()
 
     def test_setUpSock(self):
         ip='127.0.0.1'
@@ -115,7 +115,7 @@ class TestServer(unittest.TestCase):
         temp.connect(('127.0.0.1',6969))
         temp.send(b'hello')
         s,_=getNewConnection(self.listenSck[0])
-        self.assertTrue(isNewUser(s))
+        self.assertTrue(isNewUser(s,self.loggedSock))
 
 if __name__ == "__main__": 
     unittest.main()
