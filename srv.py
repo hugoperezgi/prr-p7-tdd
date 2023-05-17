@@ -44,3 +44,9 @@ def saveCli(user,passw):
     f=open("local/users.bin","ab",0)
     f.write(user+b" "+passw+b"\n")
     f.close()
+
+def setUpServer(ip: str='127.0.0.1', port: int=6969, mode: int=1):
+    s=[setUpSock(ip,port,mode),]
+    s2=setUpUnbindedSock()
+    u=setUpStoredPasswords()
+    return s,s2,u

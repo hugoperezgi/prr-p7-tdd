@@ -95,8 +95,10 @@ class TestServer(unittest.TestCase):
         self.assertEqual(exp[usr]+b'\n',try1[usr])
 
     def test_setUpServer(self):
-        e=setUpServer('127.0.0.1',6969)
+        e,e2,p=setUpServer('127.0.0.1',6969)
         self.assertIsInstance(e[0],socket.socket().__class__)
+        self.assertIsInstance(e2,socket.socket().__class__)
+        self.assertIsInstance(p,dict)
 
 if __name__ == "__main__": 
     unittest.main()
