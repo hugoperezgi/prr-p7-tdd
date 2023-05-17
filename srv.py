@@ -1,4 +1,4 @@
-import os, time, sys, socket
+import os, time, sys, socket, select
 import hashlib
 
 def setUpSock(ip: str='127.0.0.1', port: int=6969, mode: int=1):
@@ -7,6 +7,12 @@ def setUpSock(ip: str='127.0.0.1', port: int=6969, mode: int=1):
     else: s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
     s.bind((ip,port))
+    return s
+def setUpUnbindedSock(mode: int=1):
+    '''mode 1 = tcp; mode 0 = udp'''
+    if mode: s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    else: s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
     return s
 
 def generateAdmin():
