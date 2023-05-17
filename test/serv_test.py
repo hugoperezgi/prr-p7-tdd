@@ -71,9 +71,15 @@ class TestServer(unittest.TestCase):
         protocol=0
         self.assertIsInstance(setUpSock(ip,port,protocol),socket.socket().__class__)
         
+    def test_generateAdmin(self):
+        hashgen=hashlib.sha512()
+        hashgen.update(b'admin#0000')
+        self.assertTupleEqual((b'admin#0000',hashgen.digest()),generateAdmin())    
+
     def test_setUpStoredPasswords(self):
         expected={}
-        hashgen=hashlib.sha512().update(b'admin#0000')
+        hashgen=hashlib.sha512()
+        hashgen.update(b'admin#0000')
         expected[b'admin#0000']=hashgen.digest()
         self.assertDictEqual(expected,setUpStoredPasswords())
 
