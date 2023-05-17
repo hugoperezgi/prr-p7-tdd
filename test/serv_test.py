@@ -94,6 +94,9 @@ class TestServer(unittest.TestCase):
         try1=setUpStoredPasswords()
         self.assertEqual(exp[usr]+b'\n',try1[usr])
 
+    def test_setUpServer(self):
+        e=setUpServer('127.0.0.1',6969)
+        self.assertIsInstance(e[0],socket.socket().__class__)
 
 if __name__ == "__main__": 
     unittest.main()
