@@ -90,7 +90,9 @@ class TestServer(unittest.TestCase):
         usr=b'fuck'
         pss=b'me'
         exp[usr]=pss
-        self.assertEqual(exp[usr],saveCli(usr,pss))
+        saveCli(usr,pss)
+        try1=setUpStoredPasswords()
+        self.assertEqual(exp[usr]+b'\n',try1[usr])
 
 
 if __name__ == "__main__": 

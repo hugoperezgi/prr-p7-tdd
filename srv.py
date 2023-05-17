@@ -32,4 +32,8 @@ def setUpStoredPasswords():
 
     return loggedUsers
 
-def saveCli():pass
+def saveCli(user,passw):
+    '''cli user,password saved to local storage'''
+    f=open("local/users.bin","ab",0)
+    f.write(user+b" "+passw+b"\n")
+    f.close()
