@@ -2,7 +2,9 @@ from srv import *
 import unittest
 
 class TestServer(unittest.TestCase):
-    pass
+    
+    def test_setUpSock(self):
+        self.assertEqual(1,2)
 
 if __name__ == "__main__": 
     unittest.main()
