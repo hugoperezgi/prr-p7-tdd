@@ -85,5 +85,13 @@ class TestServer(unittest.TestCase):
         with self.assertRaises(FileExistsError):
             f=open("./local/users.bin","xb",0)
 
+    def test_saveCli(self):
+        exp={}
+        usr=b'fuck'
+        pss=b'me'
+        exp[usr]=pss
+        self.assertEqual(exp[usr],saveCli(usr,pss))
+
+
 if __name__ == "__main__": 
     unittest.main()

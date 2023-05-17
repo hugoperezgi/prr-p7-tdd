@@ -31,3 +31,5 @@ def setUpStoredPasswords():
             loggedUsers[l.partition(b" ")[0]] = l.partition(b" ")[2]
 
     return loggedUsers
+
+def saveCli():pass
