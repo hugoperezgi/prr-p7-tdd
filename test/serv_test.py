@@ -66,7 +66,8 @@ import unittest
 class TestServer(unittest.TestCase):
     
     def test_setUpSock(self):
-        self.assertIsInstance(setUpSock(),socket.socket())
+        self.assertIsInstance(setUpSock(),socket.socket().__class__)
+        
 
 if __name__ == "__main__": 
     unittest.main()
