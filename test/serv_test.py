@@ -110,7 +110,12 @@ class TestServer(unittest.TestCase):
         self.assertEqual(b'hello',helo)
         self.assertIsInstance(s,socket.socket().__class__)
 
-
+    def test_isNewUser(self):
+        temp=setUpUnbindedSock(1)
+        temp.connect(('127.0.0.1',6969))
+        temp.send(b'hello')
+        s,_=getNewConnection(self.listenSck[0])
+        self.assertTrue(isNewUser(s))
 
 if __name__ == "__main__": 
     unittest.main()
