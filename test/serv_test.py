@@ -100,5 +100,10 @@ class TestServer(unittest.TestCase):
         self.assertIsInstance(e2,socket.socket().__class__)
         self.assertIsInstance(p,dict)
 
+    def test_getNewConnection(self):
+        s,helo=getNewConnection()
+        self.assertEqual(b'hello',helo)
+        self.assertIsInstance(s,socket.socket().__class__)
+
 if __name__ == "__main__": 
     unittest.main()
