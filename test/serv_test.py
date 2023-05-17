@@ -117,5 +117,14 @@ class TestServer(unittest.TestCase):
         s,_=getNewConnection(self.listenSck[0])
         self.assertTrue(isNewUser(s,self.loggedSock))
 
+    def test_registerNewUser(self):
+        temp=setUpUnbindedSock(1)
+        temp.connect(('127.0.0.1',6969))
+        temp.send(b'hello')
+        s,elo=getNewConnection(self.listenSck[0])
+        self.assertFalse(registerNewUser(s,elo,self.loggedSock,self.registerdUsers,self.listenSck)) 
+        
+
+
 if __name__ == "__main__": 
     unittest.main()
