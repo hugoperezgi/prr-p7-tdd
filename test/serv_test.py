@@ -98,17 +98,15 @@ class TestServer(unittest.TestCase):
         self.assertEqual(exp[usr]+b'\n',try1[usr])
 
     def test_setUpServer(self):
-        e,e2,p=setUpServer('127.0.0.1',6969)
-        self.assertIsInstance(e[0],socket.socket().__class__)
-        self.assertIsInstance(e2,socket.socket().__class__)
-        self.assertIsInstance(p,dict)
+        self.assertIsInstance(self.listenSck[0],socket.socket().__class__)
+        self.assertIsInstance(self.updSock,socket.socket().__class__)
+        self.assertIsInstance(self.loggedUsers,dict)
 
     def test_getNewConnection(self):
-        s,_,_=setUpServer()
         temp=setUpUnbindedSock(1)
         temp.connect(('127.0.0.1',6969))
         temp.send(b'hello')
-        s,helo=getNewConnection(s[0])
+        s,helo=getNewConnection(self.listenSck[0])
         self.assertEqual(b'hello',helo)
         self.assertIsInstance(s,socket.socket().__class__)
 
