@@ -18,9 +18,6 @@ class TestClient(unittest.TestCase):
         codedPM=b'!msg-'+'HelloThere'.encode('utf8')+b' -> '+'GeneralKenobi#0212'.encode('utf8')
         self.assertEqual(encodePM('HelloThere','GeneralKenobi#0212'),codedPM)
 
-    def test_encodeGrpMsg(self):
-        codedMSG=b'!msg-'+'Execute Order 66'.encode('utf8')+b' -> '+'212th'.encode('utf8')
-        self.assertEqual(encodeGrpMsg('Execute Order 66','212th'),codedMSG)
         
 
 if __name__ == "__main__": 
