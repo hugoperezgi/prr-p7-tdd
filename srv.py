@@ -71,3 +71,4 @@ def registerNewUser(sck:socket.socket,msg: str,LoggedSockets: dict,RegisteredUse
     LoggedSockets[sck.fileno()]=unam
     RegisteredUsers[unam]=psw
     return 0
+

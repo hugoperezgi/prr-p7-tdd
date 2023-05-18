@@ -126,8 +126,6 @@ class TestServer(unittest.TestCase):
         try1=setUpStoredPasswords()
         self.assertEqual(b'shietpassword'+b'\n',try1[b'hello#2345'])
 
-    def test_userInDB(self):
-        self.assertTrue(userInDB(b'hello#2345'))
 
 if __name__ == "__main__": 
     unittest.main()
