@@ -6,7 +6,6 @@ def setUpSock(ip:str='127.0.0.1',port:int=6868):
     sckUDP = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     sckUDP.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
     sckUDP.bind((ip,port))
-    sckUDP.listen()
     return sckTCP,sckUDP
 
 def encodeCredentials(usr:str,psw:str):
@@ -37,7 +36,7 @@ def set_proc_name(newname):
 
 def privateChatSelect(usr:str,sckTCP:socket.socket,udpStuff:tuple):
     #TODO Algo para saber q chats tienes abiertos etc, but no one asked so idc
-    os.system('cls')
+    os.system('clear')
     target=input("Please introduce the user you want to message: ")
     codedQuery=encodeUpdateChat(usr,target,udpStuff[1],udpStuff[2])
     sckTCP.send(codedQuery)
@@ -52,13 +51,13 @@ def privateChatSelect(usr:str,sckTCP:socket.socket,udpStuff:tuple):
                 print(data.decode('utf8').strip(), end='')
             ns.close()
 
-            keepChatAlive(target,codedQuery,socketQueue)
+            keepChatAlive(target,codedQuery,socketQueue,(usr,sckTCP,udpStuff))
         elif(sck.fileno()==socketQueue[0].fileno()):
             print(sck.recv(2048).decode('utf8').strip())
             input('Press Intro to continue...')
-            mainMenu()
+            mainMenu(usr,sckTCP,udpStuff)
 
-def keepChatAlive(usr:str,trgt:str,codedQuery:bytes,socketQueue:list):
+def keepChatAlive(usr:str,trgt:str,codedQuery:bytes,socketQueue:list,mainMenuArgs:tuple):
     while True:
         socketQueue.append(sys.stdin)
         rdToRead,_,_=select.select(socketQueue,[],[],5)
@@ -66,14 +65,14 @@ def keepChatAlive(usr:str,trgt:str,codedQuery:bytes,socketQueue:list):
             if inp.fileno() == socketQueue[1].fileno(): #udp
                 ns,_=inp.accept()
                 data=1
-                os.system('cls')
+                os.system('clear')
                 while data:
                     data = ns.recv(2048)
                     print(data.decode('utf8').strip(), end='')
                 ns.close()
             elif inp.fileno() == sys.stdin.fileno(): #i/o
                 userInput=inp.readline()
-                if userInput == ':q': mainMenu()
+                if userInput == ':q': mainMenu(mainMenuArgs[0],mainMenuArgs[1],mainMenuArgs[2])
                 else: socketQueue[0].send(encodeMsg(usr+':'+userInput,trgt))           
             elif inp.fileno() == socketQueue[0].fileno(): #tcp
                 r=inp.recv(2048)
@@ -84,27 +83,27 @@ def keepChatAlive(usr:str,trgt:str,codedQuery:bytes,socketQueue:list):
                 elif r==b'invalidChatYouDumbfuck':
                     print(r.decode('utf8').strip())
                     input('Press intro to go back to main menu...')
-                    mainMenu()
+                    mainMenu(mainMenuArgs[0],mainMenuArgs[1],mainMenuArgs[2])
 
         socketQueue[0].send(codedQuery)#refresh chat
     
 def publicGrpSelect(usr:str,sckTCP:socket.socket,udpStuff:tuple):pass
 
 
-def createGrp(usr:str,sckTCP:socket.socket):
-    os.system('cls')
+def createGrp(usr:str,sckTCP:socket.socket,udpStuff:tuple):
+    os.system('clear')
     target=input("Please introduce the name of the group: ") 
     sckTCP.send(encodeCreatGrp(target))
     r=sckTCP.recv(2048)
     if r==b'k': print('Group created.')
     else: print(r.decode('utf8').strip())
     input('Press intro to go back into menu.')
-    mainMenu()
+    mainMenu(usr,sckTCP,udpStuff)
 
 def mainMenu(usr:str,sckTCP:socket.socket,udpStuff:tuple):
 
     while True:
-        os.system('cls')
+        os.system('clear')
         print('Available options:')
         print('1. Select private chat')
         print('2. Select a public group')
@@ -113,10 +112,10 @@ def mainMenu(usr:str,sckTCP:socket.socket,udpStuff:tuple):
         selectr=input("Select an option: ")
         try: 
             selectr=int(selectr)
-            match select:
+            match selectr:
                 case 1:privateChatSelect(usr,sckTCP,udpStuff)
                 case 2:publicGrpSelect(usr,sckTCP,udpStuff)
-                case 3:createGrp(usr,sckTCP)
+                case 3:createGrp(usr,sckTCP,udpStuff)
                 case 4: raise SystemExit
                 case _: print('Learn how to count. Fucking moron.')
         except ValueError: print('Someone is a dumbfuck')

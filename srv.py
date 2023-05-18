@@ -88,10 +88,23 @@ def registerNewUser(sck:socket.socket,msg:bytes,LoggedSockets: dict,RegisteredUs
     if int(uname[2].decode("utf8").strip())/10000 >= 1: 
         sck.send(b'Error userid must be a 4-digit')
         return -1  
-    saveCli(unam,psw) 
+    
+    psw=psw.partition(b'\n')
+    while True:
+        if psw[1]==b'':break
+        psw=psw[0]+psw[2]
+        psw=psw.partition(b'\n')  
+    psw=psw[0].partition(b'\r')
+    while True:
+        if psw[1]==b'':break
+        psw=psw[0]+psw[2]
+        psw=psw.partition(b'\r')
+    p=psw[0]
+
+    saveCli(unam,p) 
     LoggedSockets[sck.fileno()]=unam
     ListeningSockets.append(sck)
-    RegisteredUsers[unam]=psw
+    RegisteredUsers[unam]=p
     sck.send(b'logedIn')
     return 0
 
@@ -107,6 +120,19 @@ def handleNewConnection(sck:socket.socket,msg:bytes,LoggedSockets:dict,Registere
 
 def logInUser(sck:socket.socket,msg:bytes,LoggedSockets: dict,RegisteredUsers:dict,ListeningSockets:list):
     u,_,p=msg.partition(b' ')
+
+    psw=psw.partition(b'\n')
+    while True:
+        if psw[1]==b'':break
+        psw=psw[0]+psw[2]
+        psw=psw.partition(b'\n')  
+    psw=psw[0].partition(b'\r')
+    while True:
+        if psw[1]==b'':break
+        psw=psw[0]+psw[2]
+        psw=psw.partition(b'\r')
+    p=psw[0]
+
     if p == RegisteredUsers[u]:
         LoggedSockets[sck.fileno()]=u
         ListeningSockets.append(sck)
@@ -162,12 +188,12 @@ def updateChat(sck:socket.socket,msg:bytes,udpsck:socket.socket,ip):
             if a[1] != b'@':
                 sck.send(b'NotaValidFormat') 
                 raise ValueError
-            f=f=open("local/"+a[2].decode('utf8').strip()+".bin","rb",0)
+            f=open("local/"+a[2].decode('utf8').strip()+".bin","rb",0)
         except FileNotFoundError:
             try:
                 a=a[2].partition(b'_')
                 b=a[2]+a[1]+a[0]
-                f=f=open("local/"+b.decode('utf8').strip()+".bin","rb",0)
+                f=open("local/"+b.decode('utf8').strip()+".bin","rb",0)
             except FileNotFoundError: sck.send(b'filenotfound')
 
             try:
@@ -223,8 +249,13 @@ def runServer():
             rd,_,_=select.select(readSockets,[],[])
 
             for sck in rd:
-                ns,msg=getNewConnection(sck)
-                handleNewConnection(ns,msg,loggedSockets,registeredUsers,readSockets,updSocket,activeGroups)
+                if sck.fileno() not in loggedSockets: 
+                    sck,msg=getNewConnection(sck)
+                    print('donezo')
+                else: msg=sck.recv(8196)
+                print('hey')
+                handleNewConnection(sck,msg,loggedSockets,registeredUsers,readSockets,updSocket,activeGroups)
+                print('should be done')
 
         except Exception:pass
 
