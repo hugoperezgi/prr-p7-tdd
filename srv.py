@@ -50,8 +50,9 @@ def setUpServer(ip: str='127.0.0.1', port: int=6969, mode: int=1):
     s2=setUpUnbindedSock()
     registerdUsers=setUpStoredPasswords()
     loggedSock={}
+    groups={}
     s[0].listen()
-    return s,s2,registerdUsers,loggedSock
+    return s,s2,registerdUsers,loggedSock,groups
 
 def getNewConnection(s):
     ns,_=s.accept()
@@ -73,7 +74,7 @@ def registerNewUser(sck:socket.socket,msg: str,LoggedSockets: dict,RegisteredUse
     RegisteredUsers[unam]=psw
     return 0
 
-def handleNewConnection(sck:socket.socket,msg:str,LoggedSockets: dict,RegisteredUsers:dict,ListeningSockets:list):
+def handleNewConnection(sck:socket.socket,msg:str,LoggedSockets: dict,RegisteredUsers:dict,ListeningSockets:list,groups):
     a=generateAdmin()
     if msg == b'gokys'+b' '+a[0]+b" "+a[1]+b"\n": raise SystemExit
     if sck.fileno() in LoggedSockets: pass #deal with a query
@@ -81,7 +82,7 @@ def handleNewConnection(sck:socket.socket,msg:str,LoggedSockets: dict,Registered
     if fuck in RegisteredUsers: logInUser(sck,msg,LoggedSockets,RegisteredUsers,ListeningSockets)
     else: registerNewUser(sck,msg,LoggedSockets,RegisteredUsers,ListeningSockets)
 
-def logInUser(sck:socket.socket,msg: str,LoggedSockets: dict,RegisteredUsers:dict,ListeningSockets:list):
+def logInUser(sck:socket.socket,msg:str,LoggedSockets: dict,RegisteredUsers:dict,ListeningSockets:list):
     u,_,p=msg.partition(b' ')
     if p == RegisteredUsers[u]:
         LoggedSockets[sck.fileno()]=u
@@ -89,4 +90,50 @@ def logInUser(sck:socket.socket,msg: str,LoggedSockets: dict,RegisteredUsers:dic
         return 0
     else: return 1
 
-def attendQuery(): pass
+def checkIp(ipstr):
+    ipstr=b''
+    ipstr=ipstr.partition(':')
+    if ipstr[1] == b'': return (False,)
+    try: 
+        port=int(ipstr[2].decode('utf8').strip())
+    except ValueError : return (False,)
+    return (True,(ipstr[0].decode('utf8').strip(),port))
+
+def sendMsg(msg,toUser,fromUser):
+    toUser=toUser.decode('utf8').strip()
+    fromUser=fromUser.decode('utf8').strip()
+    thisway=toUser+'_'+fromUser
+    try: f=open("local/"+thisway+".bin","ab",0)
+    except FileNotFoundError:
+        theotherway=fromUser+'_'+toUser
+        try: f=open("local/"+theotherway+".bin","ab",0)
+        except FileNotFoundError:
+            f=open("local/"+theotherway+".bin","xb",0)
+    f.write(fromUser.partition(b'#')[0]+msg+b'\n')
+    f.close()
+
+def updatePM(user1,user2,udpsck):
+    pass
+    
+def attendQuery(sck:socket.socket,msg:str,LoggedSockets: dict,RegisteredUsers:dict,ListeningSockets:list,groups,udpsck:socket.socket): 
+    if msg == b'':
+        LoggedSockets.pop(sck.fileno())
+        ListeningSockets.remove(sck)
+        sck.close()
+    else:
+        msg=msg.partition(b" -> ") # <msg> -> <userid/grpid>
+        if(msg[1] != b"->"): 
+            sck.send(b'wrongFormatYouDumbfuck')
+        if(msg[0].startswith(b'!msg')): 
+            if((msg[2] not in RegisteredUsers) or (msg[2] not in groups)): sck.send(b'invalidChatYouDumbfuck')
+            else: 
+                sendMsg(msg[0].removeprefix(b'!msg-'),msg[2],LoggedSockets[sck.fileno()])
+                updatePM(msg[2],LoggedSockets[sck.fileno()],udpsck)
+        elif(msg[0].startswith(b'!create')):
+            if(msg[2] in groups): sck.send(b'groupAlreadyExists')
+            else: pass #createGrp(msg[2])
+        elif(msg[0].startswith(b'!UDP')): 
+            v,ip=checkIp(msg[2])
+            if not v: sck.send(b'notAValidIP')
+            LoggedSockets[sck.fileno()]=(LoggedSockets[sck.fileno()],ip)
+        else: sck.send(b'invalidMSGYouDumbfuck')
