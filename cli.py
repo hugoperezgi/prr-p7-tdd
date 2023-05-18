@@ -19,6 +19,9 @@ def encodeMsg(msg:str,target:str):
 def encodeCreatGrp(grpName:str):
     return b'!create -> '+grpName.encode('utf8')
 
+def encodeUpdateChat(grpName:str,ipUDP:str='127.0.0.1',portUDP:int=7070):
+    return b'!updatechat@'+grpName.encode('utf8')+b'_group.bin -> '+ipUDP.encode('utf8')+b':'+str(portUDP).encode('utf8')
+
 def set_proc_name(newname):
     from ctypes import cdll, byref, create_string_buffer
     libc = cdll.LoadLibrary('libc.so.6')
