@@ -69,6 +69,12 @@ def registerNewUser(sck:socket.socket,msg: str,LoggedSockets: dict,RegisteredUse
     if int(uname[2].decode("utf8").strip())/10000 >= 1: return -1  
     saveCli(unam,psw) 
     LoggedSockets[sck.fileno()]=unam
+    ListeningSockets.append(sck)
     RegisteredUsers[unam]=psw
     return 0
 
+def handleNewConnection(sck:socket.socket,msg:str,LoggedSockets: dict,RegisteredUsers:dict,ListeningSockets:list):
+    if sck.fileno() in LoggedSockets: pass #deal with a query
+    fuck = msg.partition(b' ')[0]
+    if fuck in RegisteredUsers: pass #login
+    else: registerNewUser(sck,msg,LoggedSockets,RegisteredUsers,ListeningSockets)
