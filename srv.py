@@ -251,11 +251,8 @@ def runServer():
             for sck in rd:
                 if sck.fileno() not in loggedSockets: 
                     sck,msg=getNewConnection(sck)
-                    print('donezo')
                 else: msg=sck.recv(8196)
-                print('hey')
                 handleNewConnection(sck,msg,loggedSockets,registeredUsers,readSockets,updSocket,activeGroups)
-                print('should be done')
 
         except Exception:pass
 
