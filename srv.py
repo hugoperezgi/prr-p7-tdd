@@ -8,11 +8,12 @@ def setUpSock(ip: str='127.0.0.1', port: int=6969, mode: int=1):
     s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
     s.bind((ip,port))
     return s
-def setUpUnbindedSock(mode: int=1):
+def setUpUnbindedSock(mode: int=0):
     '''mode 1 = tcp; mode 0 = udp'''
     if mode: s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     else: s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+    s.settimeout(1)
     return s
 
 def generateAdmin():
@@ -61,7 +62,6 @@ def saveCli(user,passw):
 def setUpServer(ip: str='127.0.0.1', port: int=6969, mode: int=1):
     s=[setUpSock(ip,port,mode),]
     s2=setUpUnbindedSock()
-    s2.settimeout(1)
     registerdUsers=setUpStoredPasswords()
     loggedSock={}
     groups=setUpStoredGroups()
@@ -91,7 +91,7 @@ def registerNewUser(sck:socket.socket,msg:bytes,LoggedSockets: dict,RegisteredUs
 def handleNewConnection(sck:socket.socket,msg:bytes,LoggedSockets:dict,RegisteredUsers:dict,ListeningSockets:list,udpsck:socket.socket,groups):
     a=generateAdmin()
     if msg == b'gokys'+b' '+a[0]+b" "+a[1]+b"\n": raise SystemExit
-    if sck.fileno() in LoggedSockets: attendQuery(sck,msg,LoggedSockets,RegisteredUsers,ListeningSockets,groups,udpsck)
+    if sck.fileno() in LoggedSockets: attendQuery(sck,msg,LoggedSockets,RegisteredUsers,ListeningSockets,groups,setUpUnbindedSock())
     fuck = msg.partition(b' ')[0]
     if fuck in RegisteredUsers: logInUser(sck,msg,LoggedSockets,RegisteredUsers,ListeningSockets)
     else: registerNewUser(sck,msg,LoggedSockets,RegisteredUsers,ListeningSockets)
