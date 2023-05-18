@@ -208,7 +208,7 @@ def runServer():
                 ns,msg=getNewConnection(sck)
                 handleNewConnection(ns,msg,loggedSockets,registeredUsers,readSockets,updSocket,activeGroups)
 
-        except:pass
+        except Exception:pass
 
 if __name__ == "__main__": 
     set_proc_name(b'Server P7')

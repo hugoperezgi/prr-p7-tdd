@@ -100,7 +100,7 @@ class TestServer(unittest.TestCase):
     def test_setUpServer(self):
         self.assertIsInstance(self.listenSck[0],socket.socket().__class__)
         self.assertIsInstance(self.updSock,socket.socket().__class__)
-        self.assertIsInstance(self.loggedUsers,dict)
+        self.assertIsInstance(self.registerdUsers,dict)
 
     def test_getNewConnection(self):
         temp=setUpUnbindedSock(1)
