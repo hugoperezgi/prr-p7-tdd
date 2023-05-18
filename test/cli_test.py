@@ -22,9 +22,9 @@ class TestClient(unittest.TestCase):
         codedPM=b'!create -> '+'212th'.encode('utf8')
         self.assertEqual(encodeCreatGrp('212th'),codedPM)
         
-    def test_encodeUpdateChat(self):
+    def test_encodeUpdateGroupChat(self):
         codedThingy=b'!updatechat@'+'212th'.encode('utf8')+b'_group.bin'+b' -> '+'127.0.0.1'.encode('utf8')+b':'+str(7070).encode('utf8')
-        self.assertEqual(encodeUpdateChat('212th'),codedThingy)
+        self.assertEqual(encodeUpdateGroupChat('212th'),codedThingy)
         
 
 if __name__ == "__main__": 
