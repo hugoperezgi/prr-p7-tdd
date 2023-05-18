@@ -22,6 +22,19 @@ def generateAdmin():
     adminPass=hashgen.digest()
     return (adminUID,adminPass)
 
+def setUpStoredGroups():
+    grp=set()
+    try: 
+        f=open("local/groups.bin","xb",0)
+        f.close()
+    except FileExistsError:
+        f=open("local/groups.bin","rb",0)
+        ls = f.readlines()
+        f.close()
+        for l in ls: grp.add(l)
+
+    return grp
+
 def setUpStoredPasswords():
     registerdUsers={}
     adminUID,adminPass=generateAdmin()
@@ -51,7 +64,7 @@ def setUpServer(ip: str='127.0.0.1', port: int=6969, mode: int=1):
     s2.settimeout(1)
     registerdUsers=setUpStoredPasswords()
     loggedSock={}
-    groups=set()
+    groups=setUpStoredGroups()
     s[0].listen()
     return s,s2,registerdUsers,loggedSock,groups
 
@@ -75,10 +88,10 @@ def registerNewUser(sck:socket.socket,msg:bytes,LoggedSockets: dict,RegisteredUs
     RegisteredUsers[unam]=psw
     return 0
 
-def handleNewConnection(sck:socket.socket,msg:bytes,LoggedSockets: dict,RegisteredUsers:dict,ListeningSockets:list,groups):
+def handleNewConnection(sck:socket.socket,msg:bytes,LoggedSockets:dict,RegisteredUsers:dict,ListeningSockets:list,udpsck:socket.socket,groups):
     a=generateAdmin()
     if msg == b'gokys'+b' '+a[0]+b" "+a[1]+b"\n": raise SystemExit
-    if sck.fileno() in LoggedSockets: pass #deal with a query
+    if sck.fileno() in LoggedSockets: attendQuery(sck,msg,LoggedSockets,RegisteredUsers,ListeningSockets,groups,udpsck)
     fuck = msg.partition(b' ')[0]
     if fuck in RegisteredUsers: logInUser(sck,msg,LoggedSockets,RegisteredUsers,ListeningSockets)
     else: registerNewUser(sck,msg,LoggedSockets,RegisteredUsers,ListeningSockets)
@@ -182,5 +195,20 @@ def set_proc_name(newname):
     buff.value = newname
     libc.prctl(15, byref(buff), 0, 0, 0)
 
-def runServer(ip,port,mode,name):
+def runServer(name):
+    ip=input('Ip to party on: ')
+    port=input('Port: ')
     readSockets,updSocket,registeredUsers,loggedSockets,activeGroups=setUpServer()
+
+    while True:
+        try:
+            rd,_,_=select.select(readSockets,[],[])
+
+            for sck in rd:
+                ns,msg=getNewConnection(sck)
+                handleNewConnection(ns,msg,loggedSockets,registeredUsers,readSockets,updSocket,activeGroups)
+
+        except:pass
+
+if __name__ == "__main__": 
+    runServer()
