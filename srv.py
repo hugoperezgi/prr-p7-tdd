@@ -78,14 +78,21 @@ def isNewUser(sck,loggedSock):
 
 def registerNewUser(sck:socket.socket,msg:bytes,LoggedSockets: dict,RegisteredUsers:dict,ListeningSockets:list):
     unam,shiet,psw=msg.partition(b" ")
-    if shiet != b' ': return -1
+    if shiet != b' ': 
+        sck.send(b'Error format should be: name#id password')
+        return -1
     uname=unam.partition(b'#')
-    if uname[1] != b'#': return -1
-    if int(uname[2].decode("utf8").strip())/10000 >= 1: return -1  
+    if uname[1] != b'#': 
+        sck.send(b'Error user must have name#id format')
+        return -1
+    if int(uname[2].decode("utf8").strip())/10000 >= 1: 
+        sck.send(b'Error userid must be a 4-digit')
+        return -1  
     saveCli(unam,psw) 
     LoggedSockets[sck.fileno()]=unam
     ListeningSockets.append(sck)
     RegisteredUsers[unam]=psw
+    sck.send(b'logedIn')
     return 0
 
 def handleNewConnection(sck:socket.socket,msg:bytes,LoggedSockets:dict,RegisteredUsers:dict,ListeningSockets:list,udpsck:socket.socket,groups):
@@ -101,8 +108,11 @@ def logInUser(sck:socket.socket,msg:bytes,LoggedSockets: dict,RegisteredUsers:di
     if p == RegisteredUsers[u]:
         LoggedSockets[sck.fileno()]=u
         ListeningSockets.append(sck)
+        sck.send(b'logedIn')
         return 0
-    else: return 1
+    else: 
+        sck.send(b'urppIsNotBigEnough')
+        return 1
 
 def checkIp(ipstr):
     ipstr=b''
