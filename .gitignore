@@ -2,3 +2,6 @@
 __pycache__/
 local/
 
+test/__pycache__/
+fuckpy.py
+.gitignore
