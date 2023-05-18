@@ -2,7 +2,9 @@ import os, time, sys, socket, select, hashlib
 
 def setUpSock(ip:str='127.0.0.1',port:int=6868):
     sckTCP = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    sckTCP.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
     sckUDP = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    sckUDP.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
     sckUDP.bind((ip,port))
     return sckTCP,sckUDP
 
@@ -32,7 +34,31 @@ def set_proc_name(newname):
     buff.value = newname
     libc.prctl(15, byref(buff), 0, 0, 0)
 
-def mainMenu(usr:str,sckTCP:socket.socket,sckUDP:socket.socket):pass
+def privateChatSelect(usr:str,sckTCP:socket.socket,sckUDP:socket.socket):pass
+def publicGrpSelect(usr:str,sckTCP:socket.socket,sckUDP:socket.socket):pass
+def createGrp(usr:str,sckTCP:socket.socket):pass
+
+def mainMenu(usr:str,sckTCP:socket.socket,sckUDP:socket.socket):
+
+    while True:
+        os.system('cls')
+        print('Available options:')
+        print('1. Select private chat')
+        print('2. Select a public group')
+        print('3. Create a group')
+        print('4. Disconnect')
+        selectr=input("Select an option: ")
+        try: 
+            selectr=int(selectr)
+            match select:
+                case 1:privateChatSelect(usr,sckTCP,sckUDP)
+                case 2:publicGrpSelect(usr,sckTCP,sckUDP)
+                case 3:createGrp(usr,sckTCP)
+                case 4: raise SystemExit
+                case _: print('Learn how to count. Fucking moron.')
+        except ValueError: print('Someone is a dumbfuck')
+        input('Press Enter for another go, I believe in you...')
+
 
 def logInResponseLogic(serverResponse:bytes):
     if(serverResponse==b'urppIsNotBigEnough'): 
@@ -48,13 +74,13 @@ def logInResponseLogic(serverResponse:bytes):
     else: return 0
 
 def runClient(ip:str='127.0.0.1',port:int=7070,serverIp:str='127.0.0.1',serverPort:int=6969):
-    sckTCP,sckUDP=setUpSock(ip,port)
-    sckTCP.connect((serverIp,serverPort))
+
 
     while True:
         usr=input('Username:')
         psw=input('Password:')
-
+        sckTCP,sckUDP=setUpSock(ip,port)
+        sckTCP.connect((serverIp,serverPort))        
         sckTCP.send(encodeCredentials(usr,psw))
         response=sckTCP.recv(4096)
         if logInResponseLogic(response): continue
