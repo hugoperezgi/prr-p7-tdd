@@ -6,6 +6,7 @@ def setUpSock(ip:str='127.0.0.1',port:int=6868):
     sckUDP = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     sckUDP.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
     sckUDP.bind((ip,port))
+    sckUDP.listen()
     return sckTCP,sckUDP
 
 def encodeCredentials(usr:str,psw:str):
@@ -34,11 +35,58 @@ def set_proc_name(newname):
     buff.value = newname
     libc.prctl(15, byref(buff), 0, 0, 0)
 
-def privateChatSelect(usr:str,sckTCP:socket.socket,sckUDP:socket.socket):pass
-def publicGrpSelect(usr:str,sckTCP:socket.socket,sckUDP:socket.socket):pass
+def privateChatSelect(usr:str,sckTCP:socket.socket,udpStuff:tuple):
+    #TODO Algo para saber q chats tienes abiertos etc, but no one asked so idc
+    target=input("Please introduce the user you want to message: ")
+    codedQuery=encodeUpdateChat(usr,target,udpStuff[1],udpStuff[2])
+    sckTCP.send(codedQuery)
+    socketQueue=[sckTCP,udpStuff[0]]
+    rdTRD=select.select(socketQueue,[],[])
+    for sck in rdTRD:
+        if(sck.fileno()==socketQueue[1].fileno()):
+            ns,_=sck.accept()
+            data=1
+            while data:
+                data = ns.recv(2048)
+                print(data.decode('utf8').strip(), end='')
+            ns.close()
+
+            keepChatAlive(target,codedQuery,socketQueue)
+        elif(sck.fileno()==socketQueue[0].fileno()):
+            print(sck.recv(2048).decode('utf8').strip())
+
+def keepChatAlive(trgt:str,codedQuery:bytes,socketQueue:list):
+    while True:
+        socketQueue.append(sys.stdin)
+        rdToRead,_,_=select.select(socketQueue,[],[],5)
+        for inp in rdToRead:
+            if inp.fileno() == socketQueue[1].fileno(): #udp
+                ns,_=inp.accept()
+                data=1
+                while data:
+                    data = ns.recv(2048)
+                    print(data.decode('utf8').strip(), end='')
+                ns.close()
+            elif inp.fileno() == sys.stdin.fileno(): #i/o
+                userInput=inp.readline()
+                if userInput == ':q': mainMenu()
+                else: socketQueue[0].send(encodeMsg(userInput,trgt))           
+            elif inp.fileno() == socketQueue[0].fileno(): #tcp
+                r=inp.recv(2048)
+                if r == b'cy@':
+                    print('The server is shutting down. Closing program...')
+                    input('Press Enter to exit.')
+                    raise SystemExit
+
+        socketQueue[0].send(codedQuery)#refresh chat
+
+
+
+    
+def publicGrpSelect(usr:str,sckTCP:socket.socket,udpStuff:tuple):pass
 def createGrp(usr:str,sckTCP:socket.socket):pass
 
-def mainMenu(usr:str,sckTCP:socket.socket,sckUDP:socket.socket):
+def mainMenu(usr:str,sckTCP:socket.socket,udpStuff:tuple):
 
     while True:
         os.system('cls')
@@ -51,8 +99,8 @@ def mainMenu(usr:str,sckTCP:socket.socket,sckUDP:socket.socket):
         try: 
             selectr=int(selectr)
             match select:
-                case 1:privateChatSelect(usr,sckTCP,sckUDP)
-                case 2:publicGrpSelect(usr,sckTCP,sckUDP)
+                case 1:privateChatSelect(usr,sckTCP,udpStuff)
+                case 2:publicGrpSelect(usr,sckTCP,udpStuff)
                 case 3:createGrp(usr,sckTCP)
                 case 4: raise SystemExit
                 case _: print('Learn how to count. Fucking moron.')
@@ -84,7 +132,7 @@ def runClient(ip:str='127.0.0.1',port:int=7070,serverIp:str='127.0.0.1',serverPo
         sckTCP.send(encodeCredentials(usr,psw))
         response=sckTCP.recv(4096)
         if logInResponseLogic(response): continue
-        mainMenu(usr,sckTCP,sckUDP)
+        mainMenu(usr,sckTCP,(sckUDP,ip,port))
 
 if __name__ == "__main__": 
     #python3 cli (clientIp clientPort (serverIp serverPort (processName)))
