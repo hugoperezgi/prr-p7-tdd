@@ -16,6 +16,9 @@ def encodeMsg(msg:str,target:str):
     target=target.encode('utf8')
     return b'!msg-'+msg+b' -> '+target
 
+def encodeCreatGrp(grpName:str):
+    return b'!create -> '+grpName.encode('utf8')
+
 def set_proc_name(newname):
     from ctypes import cdll, byref, create_string_buffer
     libc = cdll.LoadLibrary('libc.so.6')
