@@ -1,6 +1,10 @@
 import os, time, sys, socket, select
 
-
+def setUpSock(ip:str='127.0.0.1',port:int=6868):
+    sckTCP = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    sckUDP = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    sckUDP.bind((ip,port))
+    return sckTCP,sckUDP
 
 def set_proc_name(newname):
     from ctypes import cdll, byref, create_string_buffer
