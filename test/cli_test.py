@@ -14,5 +14,9 @@ class TestClient(unittest.TestCase):
         hashgen.update(psw)
         self.assertEqual(logIn('fuck','you'),(usr,hashgen.digest()))
 
+    def test_encodePM(self):
+        codedPM=b'!msg-'+'HelloThere'.encode('utf8')+b' -> '+'GeneralKenobi#0212'.encode('utf8')
+        self.assertEqual(encodePM('HelloThere','GeneralKenobi#0212'),codedPM)
+
 if __name__ == "__main__": 
     unittest.main()
