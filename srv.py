@@ -102,19 +102,31 @@ def checkIp(ipstr):
 
 def sendPM(msg,toUser,fromUser):
     toUser=toUser.decode('utf8').strip()
-    fromUser=fromUser.decode('utf8').strip()
-    thisway=toUser+'_'+fromUser
+    fromUserS=fromUser.decode('utf8').strip()
+    thisway=toUser+'_'+fromUserS
     try: f=open("local/"+thisway+".bin","ab",0)
     except FileNotFoundError:
-        theotherway=fromUser+'_'+toUser
+        theotherway=fromUserS+'_'+toUser
         try: f=open("local/"+theotherway+".bin","ab",0)
         except FileNotFoundError:
             f=open("local/"+theotherway+".bin","xb",0)
     f.write(fromUser.partition(b'#')[0]+msg+b'\n')
     f.close()
 
+def sendGrpMsg(msg,toGRP,fromUser):
+    toGRP=toGRP.decode('utf8').strip()
+    thisway=toGRP+'_group'
+    try: f=open("local/"+thisway+".bin","ab",0)
+    except FileNotFoundError:
+        f=open("local/"+thisway+".bin","xb",0)
+    f.write(fromUser.partition(b'#')[0]+msg+b'\n')
+    f.close()
+
 def createGrp(name,groups):
     groups.add(name)
+    f=open("local/groups.bin","ab",0)
+    f.write(name+b"\n")
+    f.close()
     f=open("local/"+name.decode('utf8').strip()+"_group.bin","xb",0)
     f.close()
     
@@ -128,15 +140,15 @@ def attendQuery(sck:socket.socket,msg:bytes,LoggedSockets: dict,RegisteredUsers:
         if(msg[1] != b" -> "): 
             sck.send(b'wrongFormatYouDumbfuck')
         if(msg[0].startswith(b'!msg')): 
-            if((msg[2] not in RegisteredUsers) or (msg[2] not in groups)): sck.send(b'invalidChatYouDumbfuck')
-            else: 
-                sendPM(msg[0].removeprefix(b'!msg-'),msg[2],LoggedSockets[sck.fileno()])
+            if(msg[2] in RegisteredUsers): sendPM(msg[0].removeprefix(b'!msg-'),msg[2],LoggedSockets[sck.fileno()])
+            elif(msg[2] not in groups): sendGrpMsg(msg[0].removeprefix(b'!msg-'),msg[2],LoggedSockets[sck.fileno()])               
+            else: sck.send(b'invalidChatYouDumbfuck')
         elif(msg[0].startswith(b'!create')):
             if(msg[2] in groups): sck.send(b'groupAlreadyExists')
             if msg[2].partition(b'#')[1] == b'#':  sck.send(b'NotaValidGrpName')
             else: createGrp(msg[2],groups)
         elif(msg[0].startswith(b'!updatechat')): #!updatechat@<uid/group> -> dirIpUDPsocket(ip:port)
-            v,ip=checkIp(msg[2])
+            v,ip=checkIp(msg[2])                 # <user1_user2> (if chat) <grpname_group> (if group)
             if not v: sck.send(b'notAValidIP')
             try:
                 try:
@@ -162,3 +174,13 @@ def attendQuery(sck:socket.socket,msg:bytes,LoggedSockets: dict,RegisteredUsers:
                     except:sck.send(b'notAValidIP')
             except ValueError:pass
         else: sck.send(b'invalidMSGYouDumbfuck')
+
+def set_proc_name(newname):
+    from ctypes import cdll, byref, create_string_buffer
+    libc = cdll.LoadLibrary('libc.so.6')
+    buff = create_string_buffer(len(newname)+1)
+    buff.value = newname
+    libc.prctl(15, byref(buff), 0, 0, 0)
+
+def runServer(ip,port,mode,name):
+    readSockets,updSocket,registeredUsers,loggedSockets,activeGroups=setUpServer()
