@@ -14,9 +14,9 @@ class TestClient(unittest.TestCase):
         hashgen.update(psw)
         self.assertEqual(encodeCredentials('fuck','you'),(usr,hashgen.digest()))
 
-    def test_encodePM(self):
+    def test_encodeMsg(self):
         codedPM=b'!msg-'+'HelloThere'.encode('utf8')+b' -> '+'GeneralKenobi#0212'.encode('utf8')
-        self.assertEqual(encodePM('HelloThere','GeneralKenobi#0212'),codedPM)
+        self.assertEqual(encodeMsg('HelloThere','GeneralKenobi#0212'),codedPM)
 
         
 

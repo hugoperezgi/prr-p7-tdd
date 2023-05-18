@@ -11,10 +11,10 @@ def encodeCredentials(usr:str,psw:str):
     hashgen.update(psw.encode('utf8'))
     return (usr.encode('utf8'),hashgen.digest())
 
-def encodePM(msg:str,user:str):
+def encodeMsg(msg:str,target:str):
     msg=msg.encode('utf8')
-    user=user.encode('utf8')
-    return b'!msg-'+msg+b' -> '+user
+    target=target.encode('utf8')
+    return b'!msg-'+msg+b' -> '+target
 
 def set_proc_name(newname):
     from ctypes import cdll, byref, create_string_buffer
