@@ -143,6 +143,32 @@ def createGrp(name,groups):
     f=open("local/"+name.decode('utf8').strip()+"_group.bin","xb",0)
     f.close()
     
+def updateChat(sck:socket.socket,msg:bytes,udpsck:socket.socket,ip):
+    try:
+        try:
+            a=msg[0].partition(b"@")
+            if a[1] != b'@':
+                sck.send(b'NotaValidFormat') 
+                raise ValueError
+            f=f=open("local/"+a[2].decode('utf8').strip()+".bin","rb",0)
+        except FileNotFoundError:
+            try:
+                a=a[2].partition(b'_')
+                b=a[2]+a[1]+a[0]
+                f=f=open("local/"+b.decode('utf8').strip()+".bin","rb",0)
+            except FileNotFoundError: sck.send(b'filenotfound')
+
+            try:
+                udpsck.connect(ip)
+                while True:
+                    data = f.read()
+                    if data == b'': break
+                    udpsck.send(data)
+                f.close()
+            except:sck.send(b'notAValidIP')
+    except ValueError:pass
+
+
 def attendQuery(sck:socket.socket,msg:bytes,LoggedSockets: dict,RegisteredUsers:dict,ListeningSockets:list,groups:set,udpsck:socket.socket): 
     if msg == b'':
         LoggedSockets.pop(sck.fileno())
@@ -163,29 +189,7 @@ def attendQuery(sck:socket.socket,msg:bytes,LoggedSockets: dict,RegisteredUsers:
         elif(msg[0].startswith(b'!updatechat')): #!updatechat@<uid/group> -> dirIpUDPsocket(ip:port)
             v,ip=checkIp(msg[2])                 # <user1_user2> (if chat) <grpname_group> (if group)
             if not v: sck.send(b'notAValidIP')
-            try:
-                try:
-                    a=msg[0].partition(b"@")
-                    if a[1] != b'@':
-                        sck.send(b'NotaValidFormat') 
-                        raise ValueError
-                    f=f=open("local/"+a[2].decode('utf8').strip()+".bin","ab",0)
-                except FileNotFoundError:
-                    try:
-                        a=a[2].partition(b'_')
-                        b=a[2]+a[1]
-                        f=f=open("local/"+b.decode('utf8').strip()+".bin","ab",0)
-                    except FileNotFoundError: sck.send(b'filenotfound')
-
-                    try:
-                        udpsck.connect(ip)
-                        while True:
-                            data = f.read()
-                            if data == b'': break
-                            udpsck.send(data)
-                        f.close()
-                    except:sck.send(b'notAValidIP')
-            except ValueError:pass
+            else:updateChat(sck,msg,udpsck,ip)
         else: sck.send(b'invalidMSGYouDumbfuck')
 
 def set_proc_name(newname):
