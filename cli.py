@@ -6,7 +6,7 @@ def setUpSock(ip:str='127.0.0.1',port:int=6868):
     sckUDP.bind((ip,port))
     return sckTCP,sckUDP
 
-def logIn(usr:str,psw:str):
+def encodeCredentials(usr:str,psw:str):
     hashgen = hashlib.sha512()
     hashgen.update(psw.encode('utf8'))
     return (usr.encode('utf8'),hashgen.digest())
