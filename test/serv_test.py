@@ -120,10 +120,11 @@ class TestServer(unittest.TestCase):
     def test_registerNewUser(self):
         temp=setUpUnbindedSock(1)
         temp.connect(('127.0.0.1',6969))
-        temp.send(b'hello')
+        temp.send(b'hello#2345 shietpassword')
         s,elo=getNewConnection(self.listenSck[0])
-        self.assertFalse(registerNewUser(s,elo,self.loggedSock,self.registerdUsers,self.listenSck)) 
-        
+        self.assertEqual(registerNewUser(s,elo,self.loggedSock,self.registerdUsers,self.listenSck),0) 
+        try1=setUpStoredPasswords()
+        self.assertEqual(b'shietpassword'+b'\n',try1[b'hello#2345'])
 
 
 if __name__ == "__main__": 

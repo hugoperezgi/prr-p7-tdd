@@ -60,3 +60,14 @@ def getNewConnection(s):
 
 def isNewUser(sck,loggedSock):
     return sck.fileno() not in loggedSock
+
+def registerNewUser(sck:socket.socket,msg: str,LoggedSockets: dict,RegisteredUsers:dict,ListeningSockets:list):
+    unam,shiet,psw=msg.partition(b" ")
+    if shiet != b' ': return -1
+    uname=unam.partition(b'#')
+    if uname[1] != b'#': return -1
+    if int(uname[2].decode("utf8").strip())/10000 >= 1: return -1  
+    saveCli(unam,psw) 
+    LoggedSockets[sck.fileno()]=unam
+    RegisteredUsers[unam]=psw
+    return 0
