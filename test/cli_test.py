@@ -25,6 +25,10 @@ class TestClient(unittest.TestCase):
     def test_encodeUpdateGroupChat(self):
         codedThingy=b'!updatechat@'+'212th'.encode('utf8')+b'_group.bin'+b' -> '+'127.0.0.1'.encode('utf8')+b':'+str(7070).encode('utf8')
         self.assertEqual(encodeUpdateGroupChat('212th'),codedThingy)
+
+    def test_encodeUpdateChat(self):
+        codedThingy=b'!updatechat@'+'pepito#3456'.encode('utf8')+b'_'+'tontito#1234'.encode('utf8')+b'.bin -> '+'127.0.0.1'.encode('utf8')+b':'+str(7070).encode('utf8')
+        self.assertEqual(encodeUpdateChat('pepito#3456','tontito#1234'),codedThingy)
         
 
 if __name__ == "__main__": 

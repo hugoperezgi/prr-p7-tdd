@@ -23,7 +23,7 @@ def encodeUpdateGroupChat(grpName:str,ipUDP:str='127.0.0.1',portUDP:int=7070):
     return b'!updatechat@'+grpName.encode('utf8')+b'_group.bin -> '+ipUDP.encode('utf8')+b':'+str(portUDP).encode('utf8')
 
 def encodeUpdateChat(user:str,target:str,ipUDP:str='127.0.0.1',portUDP:int=7070):
-    return b'!updatechat@'+user.encode('utf8')+b'_'+target.encode('utf8')+'.bin -> '+ipUDP.encode('utf8')+b':'+str(portUDP).encode('utf8')
+    return b'!updatechat@'+user.encode('utf8')+b'_'+target.encode('utf8')+b'.bin -> '+ipUDP.encode('utf8')+b':'+str(portUDP).encode('utf8')
 
 def set_proc_name(newname):
     from ctypes import cdll, byref, create_string_buffer
