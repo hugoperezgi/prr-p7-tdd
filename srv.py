@@ -86,3 +86,5 @@ def logInUser(sck:socket.socket,msg: str,LoggedSockets: dict,RegisteredUsers:dic
         ListeningSockets.append(sck)
         return 0
     else: return 1
+
+def attendQuery():pass

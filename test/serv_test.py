@@ -135,10 +135,8 @@ class TestServer(unittest.TestCase):
         self.assertFalse(logInUser(s,elo,self.loggedSock,self.registerdUsers,self.listenSck))
         self.assertTrue(s.fileno() in self.loggedSock)
 
-
-    def test_handleNewConnection(self):
-        handleNewConnection(getNewConnection(self.listenSck[0]))
-        self.assertEqual("bruh", 'no idea')
+    def test_attendQuery(self):
+        pass
 
 if __name__ == "__main__": 
     unittest.main()
