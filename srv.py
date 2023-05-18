@@ -48,9 +48,10 @@ def saveCli(user,passw):
 def setUpServer(ip: str='127.0.0.1', port: int=6969, mode: int=1):
     s=[setUpSock(ip,port,mode),]
     s2=setUpUnbindedSock()
+    s2.settimeout(1)
     registerdUsers=setUpStoredPasswords()
     loggedSock={}
-    groups={}
+    groups=set()
     s[0].listen()
     return s,s2,registerdUsers,loggedSock,groups
 
@@ -62,7 +63,7 @@ def getNewConnection(s):
 def isNewUser(sck,loggedSock):
     return sck.fileno() not in loggedSock
 
-def registerNewUser(sck:socket.socket,msg: str,LoggedSockets: dict,RegisteredUsers:dict,ListeningSockets:list):
+def registerNewUser(sck:socket.socket,msg:bytes,LoggedSockets: dict,RegisteredUsers:dict,ListeningSockets:list):
     unam,shiet,psw=msg.partition(b" ")
     if shiet != b' ': return -1
     uname=unam.partition(b'#')
@@ -74,7 +75,7 @@ def registerNewUser(sck:socket.socket,msg: str,LoggedSockets: dict,RegisteredUse
     RegisteredUsers[unam]=psw
     return 0
 
-def handleNewConnection(sck:socket.socket,msg:str,LoggedSockets: dict,RegisteredUsers:dict,ListeningSockets:list,groups):
+def handleNewConnection(sck:socket.socket,msg:bytes,LoggedSockets: dict,RegisteredUsers:dict,ListeningSockets:list,groups):
     a=generateAdmin()
     if msg == b'gokys'+b' '+a[0]+b" "+a[1]+b"\n": raise SystemExit
     if sck.fileno() in LoggedSockets: pass #deal with a query
@@ -82,7 +83,7 @@ def handleNewConnection(sck:socket.socket,msg:str,LoggedSockets: dict,Registered
     if fuck in RegisteredUsers: logInUser(sck,msg,LoggedSockets,RegisteredUsers,ListeningSockets)
     else: registerNewUser(sck,msg,LoggedSockets,RegisteredUsers,ListeningSockets)
 
-def logInUser(sck:socket.socket,msg:str,LoggedSockets: dict,RegisteredUsers:dict,ListeningSockets:list):
+def logInUser(sck:socket.socket,msg:bytes,LoggedSockets: dict,RegisteredUsers:dict,ListeningSockets:list):
     u,_,p=msg.partition(b' ')
     if p == RegisteredUsers[u]:
         LoggedSockets[sck.fileno()]=u
@@ -93,7 +94,7 @@ def logInUser(sck:socket.socket,msg:str,LoggedSockets: dict,RegisteredUsers:dict
 def checkIp(ipstr):
     ipstr=b''
     ipstr=ipstr.partition(':')
-    if ipstr[1] == b'': return (False,)
+    if ipstr[1] == b'': return (False,None)
     try: 
         port=int(ipstr[2].decode('utf8').strip())
     except ValueError : return (False,)
@@ -112,28 +113,52 @@ def sendMsg(msg,toUser,fromUser):
     f.write(fromUser.partition(b'#')[0]+msg+b'\n')
     f.close()
 
-def updatePM(user1,user2,udpsck):
-    pass
+def createGrp(name,groups):
+    groups.add(name)
+    f=open("local/"+name.decode('utf8').strip()+"_group.bin","xb",0)
+    f.close()
     
-def attendQuery(sck:socket.socket,msg:str,LoggedSockets: dict,RegisteredUsers:dict,ListeningSockets:list,groups,udpsck:socket.socket): 
+def attendQuery(sck:socket.socket,msg:bytes,LoggedSockets: dict,RegisteredUsers:dict,ListeningSockets:list,groups:set,udpsck:socket.socket): 
     if msg == b'':
         LoggedSockets.pop(sck.fileno())
         ListeningSockets.remove(sck)
         sck.close()
     else:
         msg=msg.partition(b" -> ") # <msg> -> <userid/grpid>
-        if(msg[1] != b"->"): 
+        if(msg[1] != b" -> "): 
             sck.send(b'wrongFormatYouDumbfuck')
         if(msg[0].startswith(b'!msg')): 
             if((msg[2] not in RegisteredUsers) or (msg[2] not in groups)): sck.send(b'invalidChatYouDumbfuck')
             else: 
                 sendMsg(msg[0].removeprefix(b'!msg-'),msg[2],LoggedSockets[sck.fileno()])
-                updatePM(msg[2],LoggedSockets[sck.fileno()],udpsck)
         elif(msg[0].startswith(b'!create')):
             if(msg[2] in groups): sck.send(b'groupAlreadyExists')
-            else: pass #createGrp(msg[2])
-        elif(msg[0].startswith(b'!UDP')): 
+            if msg[2].partition(b'#')[1] == b'#':  sck.send(b'NotaValidGrpName')
+            else: createGrp(msg[2],groups)
+        elif(msg[0].startswith(b'!updatechat')): #!updatechat@<uid/group> -> dirIpUDPsocket(ip:port)
             v,ip=checkIp(msg[2])
             if not v: sck.send(b'notAValidIP')
-            LoggedSockets[sck.fileno()]=(LoggedSockets[sck.fileno()],ip)
+            try:
+                try:
+                    a=msg[0].partition(b"@")
+                    if a[1] != b'@':
+                        sck.send(b'NotaValidFormat') 
+                        raise ValueError
+                    f=f=open("local/"+a[2].decode('utf8').strip()+".bin","ab",0)
+                except FileNotFoundError:
+                    try:
+                        a=a[2].partition(b'_')
+                        b=a[2]+a[1]
+                        f=f=open("local/"+b.decode('utf8').strip()+".bin","ab",0)
+                    except FileNotFoundError: sck.send(b'filenotfound')
+
+                    try:
+                        udpsck.connect(ip)
+                        while True:
+                            data = f.read()
+                            if data == b'': break
+                            udpsck.send(data)
+                        f.close()
+                    except:sck.send(b'notAValidIP')
+            except ValueError:pass
         else: sck.send(b'invalidMSGYouDumbfuck')
