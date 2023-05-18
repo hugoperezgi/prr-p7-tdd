@@ -9,10 +9,10 @@ class TestClient(unittest.TestCase):
 
     def test_logIn(self):
         hashgen = hashlib.sha512()
-        usr=b'fuck'
-        psw=b'you'
+        usr='fuck'.encode('utf8')
+        psw='you'.encode('utf8')
         hashgen.update(psw)
-        self.assertEqual(logIn(usr,psw),(usr,hashgen.digest()))
+        self.assertEqual(logIn('fuck','you'),(usr,hashgen.digest()))
 
 if __name__ == "__main__": 
     unittest.main()

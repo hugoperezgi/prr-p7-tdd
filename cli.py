@@ -1,10 +1,15 @@
-import os, time, sys, socket, select
+import os, time, sys, socket, select, hashlib
 
 def setUpSock(ip:str='127.0.0.1',port:int=6868):
     sckTCP = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     sckUDP = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     sckUDP.bind((ip,port))
     return sckTCP,sckUDP
+
+def logIn(usr:str,psw:str):
+    hashgen = hashlib.sha512()
+    hashgen.update(psw.encode('utf8'))
+    return (usr.encode('utf8'),hashgen.digest())
 
 def set_proc_name(newname):
     from ctypes import cdll, byref, create_string_buffer
