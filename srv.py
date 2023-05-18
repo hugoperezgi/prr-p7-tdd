@@ -195,9 +195,9 @@ def set_proc_name(newname):
     buff.value = newname
     libc.prctl(15, byref(buff), 0, 0, 0)
 
-def runServer(name):
-    ip=input('Ip to party on: ')
-    port=input('Port: ')
+def runServer():
+    # ip=input('Ip to party on: ')
+    # port=input('Port: ')
     readSockets,updSocket,registeredUsers,loggedSockets,activeGroups=setUpServer()
 
     while True:
@@ -211,4 +211,5 @@ def runServer(name):
         except:pass
 
 if __name__ == "__main__": 
+    set_proc_name(b'Server P7')
     runServer()
