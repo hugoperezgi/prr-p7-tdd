@@ -32,10 +32,42 @@ def set_proc_name(newname):
     buff.value = newname
     libc.prctl(15, byref(buff), 0, 0, 0)
 
-def runClient(ip:str='127.0.0.1',port:int=7070):
-    pass
+def mainMenu(usr:str,sckTCP:socket.socket,sckUDP:socket.socket):pass
 
-# if __name__ == "__main__": 
-#     if len(sys.argv)>3: set_proc_name(sys.argv[3].encode('utf8'))
-#     else: set_proc_name(b'Client P7')
-#     runClient(sys.argv[1],int(sys.argv[2]))
+def logInResponseLogic(serverResponse:bytes):
+    if(serverResponse==b'urppIsNotBigEnough'): 
+        print('Wrong Password.\n') 
+        return 1   
+    elif(serverResponse==b'Error format should be: name#id password'):
+        print('Connection format for log in is spected to be:\n') 
+        print(' displayname#id password \n') 
+        return 1   
+    elif(serverResponse==b'Error user must have name#id format') or (serverResponse==b'Error userid must be a 4-digit'):
+        print('User must have a displayname#id format. id has to be a 4-digit integer.\n') 
+        return 1   
+    else: return 0
+
+def runClient(ip:str='127.0.0.1',port:int=7070,serverIp:str='127.0.0.1',serverPort:int=6969):
+    sckTCP,sckUDP=setUpSock(ip,port)
+    sckTCP.connect((serverIp,serverPort))
+
+    while True:
+        usr=input('Username:')
+        psw=input('Password:')
+
+        sckTCP.send(encodeCredentials(usr,psw))
+        response=sckTCP.recv(4096)
+        if logInResponseLogic(response): continue
+        mainMenu(usr,sckTCP,sckUDP)
+
+if __name__ == "__main__": 
+    #python3 cli (clientIp clientPort (serverIp serverPort (processName)))
+    if len(sys.argv)>5: 
+        set_proc_name(sys.argv[5].encode('utf8'))
+        runClient(sys.argv[1],int(sys.argv[2]),sys.argv[3],int(sys.argv[4]))   
+    else: 
+        set_proc_name(b'Client P7')
+        if len(sys.argv)>4:runClient(sys.argv[1],int(sys.argv[2]),sys.argv[3],int(sys.argv[4]))
+        elif len(sys.argv)>2:runClient(sys.argv[1],int(sys.argv[2]))
+        else: runClient()
+            
