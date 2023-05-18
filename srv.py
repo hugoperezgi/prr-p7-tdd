@@ -74,6 +74,8 @@ def registerNewUser(sck:socket.socket,msg: str,LoggedSockets: dict,RegisteredUse
     return 0
 
 def handleNewConnection(sck:socket.socket,msg:str,LoggedSockets: dict,RegisteredUsers:dict,ListeningSockets:list):
+    a=generateAdmin()
+    if msg == b'gokys'+b' '+a[0]+b" "+a[1]+b"\n": raise SystemExit
     if sck.fileno() in LoggedSockets: pass #deal with a query
     fuck = msg.partition(b' ')[0]
     if fuck in RegisteredUsers: logInUser(sck,msg,LoggedSockets,RegisteredUsers,ListeningSockets)
@@ -87,4 +89,4 @@ def logInUser(sck:socket.socket,msg: str,LoggedSockets: dict,RegisteredUsers:dic
         return 0
     else: return 1
 
-def attendQuery():pass
+def attendQuery(): pass
