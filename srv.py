@@ -97,7 +97,9 @@ def registerNewUser(sck:socket.socket,msg:bytes,LoggedSockets: dict,RegisteredUs
 
 def handleNewConnection(sck:socket.socket,msg:bytes,LoggedSockets:dict,RegisteredUsers:dict,ListeningSockets:list,udpsck:socket.socket,groups):
     a=generateAdmin()
-    if msg == b'gokys'+b' '+a[0]+b" "+a[1]+b"\n": raise SystemExit
+    if msg == b'gokys'+b' '+a[0]+b" "+a[1]+b"\n": 
+        for s in LoggedSockets: s.send(b'cy@')
+        raise SystemExit
     if sck.fileno() in LoggedSockets: attendQuery(sck,msg,LoggedSockets,RegisteredUsers,ListeningSockets,groups,setUpUnbindedSock())
     fuck = msg.partition(b' ')[0]
     if fuck in RegisteredUsers: logInUser(sck,msg,LoggedSockets,RegisteredUsers,ListeningSockets)
@@ -195,7 +197,9 @@ def attendQuery(sck:socket.socket,msg:bytes,LoggedSockets: dict,RegisteredUsers:
         elif(msg[0].startswith(b'!create')):
             if(msg[2] in groups): sck.send(b'groupAlreadyExists')
             if msg[2].partition(b'#')[1] == b'#':  sck.send(b'NotaValidGrpName')
-            else: createGrp(msg[2],groups)
+            else: 
+                createGrp(msg[2],groups)
+                sck.send(b'k')
         elif(msg[0].startswith(b'!updatechat')): #!updatechat@<uid/group> -> dirIpUDPsocket(ip:port)
             v,ip=checkIp(msg[2])                 # <user1_user2> (if chat) <grpname_group> (if group)
             if not v: sck.send(b'notAValidIP')
