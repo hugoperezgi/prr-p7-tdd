@@ -100,7 +100,7 @@ def checkIp(ipstr):
     except ValueError : return (False,)
     return (True,(ipstr[0].decode('utf8').strip(),port))
 
-def sendMsg(msg,toUser,fromUser):
+def sendPM(msg,toUser,fromUser):
     toUser=toUser.decode('utf8').strip()
     fromUser=fromUser.decode('utf8').strip()
     thisway=toUser+'_'+fromUser
@@ -130,7 +130,7 @@ def attendQuery(sck:socket.socket,msg:bytes,LoggedSockets: dict,RegisteredUsers:
         if(msg[0].startswith(b'!msg')): 
             if((msg[2] not in RegisteredUsers) or (msg[2] not in groups)): sck.send(b'invalidChatYouDumbfuck')
             else: 
-                sendMsg(msg[0].removeprefix(b'!msg-'),msg[2],LoggedSockets[sck.fileno()])
+                sendPM(msg[0].removeprefix(b'!msg-'),msg[2],LoggedSockets[sck.fileno()])
         elif(msg[0].startswith(b'!create')):
             if(msg[2] in groups): sck.send(b'groupAlreadyExists')
             if msg[2].partition(b'#')[1] == b'#':  sck.send(b'NotaValidGrpName')
