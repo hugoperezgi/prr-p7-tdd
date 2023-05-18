@@ -76,7 +76,7 @@ def registerNewUser(sck:socket.socket,msg: str,LoggedSockets: dict,RegisteredUse
 def handleNewConnection(sck:socket.socket,msg:str,LoggedSockets: dict,RegisteredUsers:dict,ListeningSockets:list):
     if sck.fileno() in LoggedSockets: pass #deal with a query
     fuck = msg.partition(b' ')[0]
-    if fuck in RegisteredUsers: pass #login
+    if fuck in RegisteredUsers: logInUser(sck,msg,LoggedSockets,RegisteredUsers,ListeningSockets)
     else: registerNewUser(sck,msg,LoggedSockets,RegisteredUsers,ListeningSockets)
 
 def logInUser(sck:socket.socket,msg: str,LoggedSockets: dict,RegisteredUsers:dict,ListeningSockets:list):
