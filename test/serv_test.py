@@ -66,6 +66,8 @@ import unittest
 class TestServer(unittest.TestCase):
     
     def setUp(self) -> None:
+        try: os.mkdir('local/')
+        except FileExistsError: pass
         self.listenSck,self.updSock,self.registerdUsers,self.loggedSock,self.activeGroups = setUpServer()
 
     def test_setUpSock(self):
