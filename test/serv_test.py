@@ -126,6 +126,9 @@ class TestServer(unittest.TestCase):
         try1=setUpStoredPasswords()
         self.assertEqual(b'shietpassword'+b'\n',try1[b'hello#2345'])
 
+    def test_handleNewConnection(self):
+        handleNewConnection(getNewConnection(self.listenSck[0]))
+        self.assertEqual("bruh", 'no idea')
 
 if __name__ == "__main__": 
     unittest.main()
