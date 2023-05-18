@@ -122,12 +122,19 @@ class TestServer(unittest.TestCase):
         temp.connect(('127.0.0.1',6969))
         temp.send(b'hello#2345 shietpassword')
         s,elo=getNewConnection(self.listenSck[0])
-        self.assertEqual(registerNewUser(s,elo,self.loggedSock,self.registerdUsers,self.listenSck),0) 
+        self.assertEqual(registerNewUser(s,elo,self.loggedSock,self.registerdUsers,self.listenSck),0)
         try1=setUpStoredPasswords()
         self.assertEqual(b'shietpassword'+b'\n',try1[b'hello#2345'])
 
     def test_logInUser(self):
-        pass
+        temp=setUpUnbindedSock(1)
+        temp.connect(('127.0.0.1',6969))
+        temp.send(b'hello#2345 shietpassword')
+        s,elo=getNewConnection(self.listenSck[0])
+        registerNewUser(s,elo,self.loggedSock,self.registerdUsers,self.listenSck)
+        self.assertFalse(logInUser(s,elo,self.loggedSock,self.registerdUsers,self.listenSck))
+        self.assertTrue(s.fileno() in self.loggedSock)
+
 
     def test_handleNewConnection(self):
         handleNewConnection(getNewConnection(self.listenSck[0]))

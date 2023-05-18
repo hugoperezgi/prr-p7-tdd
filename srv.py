@@ -78,3 +78,11 @@ def handleNewConnection(sck:socket.socket,msg:str,LoggedSockets: dict,Registered
     fuck = msg.partition(b' ')[0]
     if fuck in RegisteredUsers: pass #login
     else: registerNewUser(sck,msg,LoggedSockets,RegisteredUsers,ListeningSockets)
+
+def logInUser(sck:socket.socket,msg: str,LoggedSockets: dict,RegisteredUsers:dict,ListeningSockets:list):
+    u,_,p=msg.partition(b' ')
+    if p == RegisteredUsers[u]:
+        LoggedSockets[sck.fileno()]=u
+        ListeningSockets.append(sck)
+        return 0
+    else: return 1
