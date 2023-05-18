@@ -12,7 +12,7 @@ class TestClient(unittest.TestCase):
         usr='fuck'.encode('utf8')
         psw='you'.encode('utf8')
         hashgen.update(psw)
-        self.assertEqual(encodeCredentials('fuck','you'),(usr,hashgen.digest()))
+        self.assertEqual(encodeCredentials('fuck','you'),(usr+b' '+hashgen.digest()))
 
     def test_encodeMsg(self):
         codedPM=b'!msg-'+'HelloThere'.encode('utf8')+b' -> '+'GeneralKenobi#0212'.encode('utf8')

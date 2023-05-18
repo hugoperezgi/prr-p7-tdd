@@ -9,7 +9,7 @@ def setUpSock(ip:str='127.0.0.1',port:int=6868):
 def encodeCredentials(usr:str,psw:str):
     hashgen = hashlib.sha512()
     hashgen.update(psw.encode('utf8'))
-    return (usr.encode('utf8'),hashgen.digest())
+    return usr.encode('utf8')+b' '+hashgen.digest()
 
 def encodeMsg(msg:str,target:str):
     msg=msg.encode('utf8')
