@@ -11,6 +11,11 @@ def logIn(usr:str,psw:str):
     hashgen.update(psw.encode('utf8'))
     return (usr.encode('utf8'),hashgen.digest())
 
+def encodePM(msg:str,user:str):
+    msg=msg.encode('utf8')
+    user=user.encode('utf8')
+    return b'!msg-'+msg+b' -> '+user
+
 def set_proc_name(newname):
     from ctypes import cdll, byref, create_string_buffer
     libc = cdll.LoadLibrary('libc.so.6')
