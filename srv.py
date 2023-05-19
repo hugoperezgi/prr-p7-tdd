@@ -172,13 +172,13 @@ def sendPM(msg,toUser,fromUser):
     f.write(msg)
     f.close()
 
-def sendGrpMsg(msg,toGRP,fromUser):
+def sendGrpMsg(msg,toGRP):
     toGRP=toGRP.decode('utf8').strip()
     thisway=toGRP+'_group'
     try: f=open("local/"+thisway+".bin","ab",0)
     except FileNotFoundError:
         f=open("local/"+thisway+".bin","xb",0)
-    f.write(fromUser.partition(b'#')[0]+msg+b'\n')
+    f.write(msg)
     f.close()
 
 def createGrp(name,groups):
@@ -240,7 +240,7 @@ def attendQuery(sck:socket.socket,msg:bytes,LoggedSockets: dict,RegisteredUsers:
             sck.send(b'wrongFormatYouDumbfuck')
         if(msg[0].startswith(b'!msg')): 
             if(msg[2] in RegisteredUsers): sendPM(msg[0].removeprefix(b'!msg-'),msg[2],LoggedSockets[sck.fileno()])
-            elif(msg[2] not in groups): sendGrpMsg(msg[0].removeprefix(b'!msg-'),msg[2],LoggedSockets[sck.fileno()])               
+            elif(msg[2] not in groups): sendGrpMsg(msg[0].removeprefix(b'!msg-'),msg[2])               
             else: sck.send(b'invalidChatYouDumbfuck')
         elif(msg[0].startswith(b'!create')):
             if(msg[2] in groups): sck.send(b'groupAlreadyExists')
@@ -262,8 +262,7 @@ def set_proc_name(newname):
     libc.prctl(15, byref(buff), 0, 0, 0)
 
 def runServer(ip:str|None=None,port:int|None=None):
-    # ip=input('Ip to party on: ')
-    # port=input('Port: ')
+
     readSockets,updSocket,registeredUsers,loggedSockets,activeGroups=setUpServer()
 
     while True:

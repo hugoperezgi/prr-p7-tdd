@@ -100,7 +100,32 @@ def keepChatAlive(usr:str,trgt:str,codedQuery:bytes,socketQueue:list,mainMenuArg
                     mainMenu(mainMenuArgs[0],mainMenuArgs[1],mainMenuArgs[2])
 
     
-def publicGrpSelect(usr:str,sckTCP:socket.socket,udpStuff:tuple):pass
+def publicGrpSelect(usr:str,sckTCP:socket.socket,udpStuff:tuple):
+    os.system('clear')
+    target=input("Please introduce the server you want to join: ")
+    codedQuery=encodeUpdateChat(usr,target,udpStuff[1],udpStuff[2])
+    sckTCP.send(codedQuery)
+    socketQueue=[sckTCP,udpStuff[0]]
+    rdTRD,_,_=select.select(socketQueue,[],[])
+    for sck in rdTRD:
+        if(sck.fileno()==socketQueue[1].fileno()):
+            data=1
+            try:
+                while data: 
+                    data,_ = sck.recvfrom(2048)
+                    print(data.decode('utf8').strip(), end='')
+            except BlockingIOError:pass
+            print('\n')
+            keepChatAlive(usr,target,codedQuery,socketQueue,(usr,sckTCP,udpStuff))
+        elif(sck.fileno()==socketQueue[0].fileno()):
+            e=sck.recv(2048)
+            if e==b'filenotfound': 
+                print('Group doesnt Exist.\n')
+                input('Press Intro to continue...')
+            else: 
+                print(e.decode('utf8').strip())
+                input('Press Intro to continue...')
+                mainMenu(usr,sckTCP,udpStuff)
 
 
 def createGrp(usr:str,sckTCP:socket.socket,udpStuff:tuple):
@@ -122,17 +147,26 @@ def mainMenu(usr:str,sckTCP:socket.socket,udpStuff:tuple):
         print('2. Select a public group')
         print('3. Create a group')
         print('4. Disconnect')
-        selectr=input("Select an option: ")
-        try: 
-            selectr=int(selectr)
-            match selectr:
-                case 1:privateChatSelect(usr,sckTCP,udpStuff)
-                case 2:publicGrpSelect(usr,sckTCP,udpStuff)
-                case 3:createGrp(usr,sckTCP,udpStuff)
-                case 4: raise SystemExit
-                case _: print('Learn how to count. Fucking moron.')
-        except ValueError: print('Someone is a dumbfuck')
-        input('Press Enter for another go, I believe in you...')
+        print("Select an option: ",end='')
+        r,_,_=select.select([sckTCP,sys.stdin],[],[])
+
+        for i in r:
+            if i.fileno() != sys.stdin.fileno(): 
+                if i.recv(2048)== b'cy@':
+                    print('The server is shutting down. Closing program...')
+                    input('Press Enter to exit.')
+                    raise SystemExit
+            else:
+                try: 
+                    selectr=int(selectr)
+                    match selectr:
+                        case 1:privateChatSelect(usr,sckTCP,udpStuff)
+                        case 2:publicGrpSelect(usr,sckTCP,udpStuff)
+                        case 3:createGrp(usr,sckTCP,udpStuff)
+                        case 4: raise SystemExit
+                        case _: print('Learn how to count. Fucking moron.')
+                except ValueError: print('Someone is a dumbfuck')
+                input('Press Enter for another go, I believe in you...')
 
 
 def logInResponseLogic(serverResponse:bytes):
