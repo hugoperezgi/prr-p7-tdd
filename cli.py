@@ -23,7 +23,7 @@ def encodeCreatGrp(grpName:str):
     return b'!create -> '+grpName.encode('utf8')
 
 def encodeUpdateGroupChat(grpName:str,ipUDP:str='127.0.0.1',portUDP:int=7070):
-    return b'!updatechat@'+grpName.encode('utf8')+b'_group.bin -> '+ipUDP.encode('utf8')+b':'+str(portUDP).encode('utf8')
+    return b'!updatechat@'+grpName.encode('utf8')+b'_group -> '+ipUDP.encode('utf8')+b':'+str(portUDP).encode('utf8')
 
 def encodeUpdateChat(user:str,target:str,ipUDP:str='127.0.0.1',portUDP:int=7070):
     return b'!updatechat@'+user.encode('utf8')+b'_'+target.encode('utf8')+b' -> '+ipUDP.encode('utf8')+b':'+str(portUDP).encode('utf8')
@@ -102,10 +102,11 @@ def keepChatAlive(usr:str,trgt:str,codedQuery:bytes,socketQueue:list,mainMenuArg
 def publicGrpSelect(usr:str,sckTCP:socket.socket,udpStuff:tuple):
     os.system('clear')
     target=input("Please introduce the server you want to join: ")
-    codedQuery=encodeUpdateGroupChat(usr,target,udpStuff[1],udpStuff[2])
+    codedQuery=encodeUpdateGroupChat(target,udpStuff[1],udpStuff[2])
+    print('Joining grp, please wait...\n')
     sckTCP.send(codedQuery)
     socketQueue=[sckTCP,udpStuff[0]]
-    rdTRD,_,_=select.select(socketQueue,[],[])
+    rdTRD,_,_=select.select(socketQueue,[],[],5)
     for sck in rdTRD:
         if(sck.fileno()==socketQueue[1].fileno()):
             data=1
@@ -119,18 +120,21 @@ def publicGrpSelect(usr:str,sckTCP:socket.socket,udpStuff:tuple):
         elif(sck.fileno()==socketQueue[0].fileno()):
             e=sck.recv(2048)
             if e==b'filenotfound': 
-                print('Group doesnt Exist.\n')
+                print('shitshow\n')
                 input('Press Intro to continue...')
+                mainMenu(usr,sckTCP,udpStuff)
             else: 
                 print(e.decode('utf8').strip())
                 input('Press Intro to continue...')
                 mainMenu(usr,sckTCP,udpStuff)
+    print('Logged into the chat room.')
+    keepChatAlive(usr,target,codedQuery,socketQueue,(usr,sckTCP,udpStuff))
 
 
 def createGrp(usr:str,sckTCP:socket.socket,udpStuff:tuple):
     os.system('clear')
     target=input("Please introduce the name of the group: ") 
-    sckTCP.send(encodeCreatGrp(target))
+    sckTCP.send(encodeCreatGrp(target.strip('\n')))
     r=sckTCP.recv(2048)
     if r==b'k': print('Group created.')
     else: print(r.decode('utf8').strip())
@@ -146,7 +150,8 @@ def mainMenu(usr:str,sckTCP:socket.socket,udpStuff:tuple):
         print('2. Select a public group')
         print('3. Create a group')
         print('4. Disconnect')
-        print("Select an option: ",end='')
+        sys.stdout.write("Select an option: ")
+        sys.stdout.flush()
         r,_,_=select.select([sckTCP,sys.stdin],[],[])
 
         for i in r:
@@ -157,7 +162,8 @@ def mainMenu(usr:str,sckTCP:socket.socket,udpStuff:tuple):
                     raise SystemExit
             else:
                 try: 
-                    selectr=int(selectr)
+
+                    selectr=int(i.readline())
                     match selectr:
                         case 1:privateChatSelect(usr,sckTCP,udpStuff)
                         case 2:publicGrpSelect(usr,sckTCP,udpStuff)

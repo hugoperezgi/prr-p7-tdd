@@ -182,7 +182,7 @@ def sendGrpMsg(msg,toGRP):
     f.close()
 
 def createGrp(name,groups):
-    groups.add(name)
+    groups.add(name+b"\n")
     f=open("local/groups.bin","ab",0)
     f.write(name+b"\n")
     f.close()
