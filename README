@@ -1,0 +1,47 @@
+INSTALLATION MANUAL
+    Check the INSTALL file
+
+USER MANUAL
+
+    Launch SERVER
+
+        In order to launch the default server, simply run the command:
+            make server
+        If you want to configure it, you'll need to launch it using:
+
+            python3 srv.py <ip> <port> &
+
+            <ip>: A valid ip address (Default is 127.0.0.1)
+            <port>: A valid port (Default is 6969)
+
+    Launch CLIENT
+
+        In order to launch the client, you can use two of the default clients:
+        
+            Run the command: 'make client1' or 'make client2'
+
+        If you want to configure it, you'll need to use the command:
+
+            python3 cli.py <cliIP> <cliPort> <servIP> <servPort> <ProcessName>
+
+            <cliIP>: A valid ip address for the client (Default is 127.0.0.1)
+            <cliPort>: A valid port for the client (Default is 6868 or 7070)
+            <servIP>: Server ip address (Default is 127.0.0.1)
+            <servPort>: Server port (Default is 6969)
+            <ProcessName>: Name of the client process that you'll launch (Default is 'Client P7')
+
+            Default client1 will use port 6868, with process name Fulanito
+            Default client2 will use port 7070, with process name Menganito
+
+            cli can  also be executed as 
+
+                python3 cli.py <cliIP> <cliPort> <servIP> <servPort> 
+                python3 cli.py <cliIP> <cliPort>
+                python3 cli.py
+            
+                When missing a field will use the default value.
+
+    Launch Tests
+
+        Server: Execute the command 'make testServer'
+        Client: Execute the command 'make testClient'

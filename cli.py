@@ -6,6 +6,7 @@ def setUpSock(ip:str='127.0.0.1',port:int=6868):
     sckUDP = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     sckUDP.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
     sckUDP.bind((ip,port))
+    sckUDP.setblocking(False)
     return sckTCP,sckUDP
 
 def encodeCredentials(usr:str,psw:str):
@@ -25,7 +26,7 @@ def encodeUpdateGroupChat(grpName:str,ipUDP:str='127.0.0.1',portUDP:int=7070):
     return b'!updatechat@'+grpName.encode('utf8')+b'_group.bin -> '+ipUDP.encode('utf8')+b':'+str(portUDP).encode('utf8')
 
 def encodeUpdateChat(user:str,target:str,ipUDP:str='127.0.0.1',portUDP:int=7070):
-    return b'!updatechat@'+user.encode('utf8')+b'_'+target.encode('utf8')+b'.bin -> '+ipUDP.encode('utf8')+b':'+str(portUDP).encode('utf8')
+    return b'!updatechat@'+user.encode('utf8')+b'_'+target.encode('utf8')+b' -> '+ipUDP.encode('utf8')+b':'+str(portUDP).encode('utf8')
 
 def set_proc_name(newname):
     from ctypes import cdll, byref, create_string_buffer
@@ -41,22 +42,23 @@ def privateChatSelect(usr:str,sckTCP:socket.socket,udpStuff:tuple):
     codedQuery=encodeUpdateChat(usr,target,udpStuff[1],udpStuff[2])
     sckTCP.send(codedQuery)
     socketQueue=[sckTCP,udpStuff[0]]
-    rdTRD=select.select(socketQueue,[],[])
+    rdTRD,_,_=select.select(socketQueue,[],[])
     for sck in rdTRD:
         if(sck.fileno()==socketQueue[1].fileno()):
-            ns,_=sck.accept()
             data=1
-            while data:
-                data = ns.recv(2048)
-                print(data.decode('utf8').strip(), end='')
-            ns.close()
-
-            keepChatAlive(target,codedQuery,socketQueue,(usr,sckTCP,udpStuff))
+            try:
+                while data: 
+                    data,_ = sck.recvfrom(2048)
+                    print(data.decode('utf8').strip(), end='')
+            except BlockingIOError:pass
+            print('\n')
+            keepChatAlive(usr,target,codedQuery,socketQueue,(usr,sckTCP,udpStuff))
         elif(sck.fileno()==socketQueue[0].fileno()):
             e=sck.recv(2048)
             if e==b'filenotfound': 
                 sckTCP.send(encodeMsg('Chat: '+usr+' with '+target+'.\n',target))
-                keepChatAlive(target,codedQuery,socketQueue,(usr,sckTCP,udpStuff))
+                mainMenuArgs=(usr,sckTCP,udpStuff)
+                keepChatAlive(usr,target,codedQuery,socketQueue,mainMenuArgs)
             else: 
                 print(e.decode('utf8').strip())
                 input('Press Intro to continue...')
@@ -64,34 +66,39 @@ def privateChatSelect(usr:str,sckTCP:socket.socket,udpStuff:tuple):
 
 def keepChatAlive(usr:str,trgt:str,codedQuery:bytes,socketQueue:list,mainMenuArgs:tuple):
     socketQueue[0].send(codedQuery)#refresh chat
+    socketQueue.append(sys.stdin)    
     while True:
-        socketQueue.append(sys.stdin)
+
         rdToRead,_,_=select.select(socketQueue,[],[],5)
         for inp in rdToRead:
             if inp.fileno() == socketQueue[1].fileno(): #udp
-                ns,_=inp.accept()
                 data=1
                 os.system('clear')
-                while data:
-                    data = ns.recv(2048)
-                    print(data.decode('utf8').strip(), end='')
-                ns.close()
+                try:
+                    while data:
+
+                        data,_ = inp.recvfrom(2048)
+                        print(data.decode('utf8').strip(), end='')
+                except BlockingIOError:pass
+                print("\n")
             elif inp.fileno() == sys.stdin.fileno(): #i/o
                 userInput=inp.readline()
-                if userInput == ':q': mainMenu(mainMenuArgs[0],mainMenuArgs[1],mainMenuArgs[2])
-                else: socketQueue[0].send(encodeMsg(usr+':'+userInput,trgt))           
+                if userInput == ':q\n': mainMenu(mainMenuArgs[0],mainMenuArgs[1],mainMenuArgs[2])
+                elif userInput==':r\n': socketQueue[0].send(codedQuery)
+                else: socketQueue[0].send(encodeMsg(usr.partition('#')[0]+': '+userInput,trgt))  
+                time.sleep(1)         
+                socketQueue[0].send(codedQuery)
             elif inp.fileno() == socketQueue[0].fileno(): #tcp
                 r=inp.recv(2048)
                 if r == b'cy@':
                     print('The server is shutting down. Closing program...')
                     input('Press Enter to exit.')
                     raise SystemExit
-                elif r==b'invalidChatYouDumbfuck':
+                else:
                     print(r.decode('utf8').strip())
                     input('Press intro to go back to main menu...')
                     mainMenu(mainMenuArgs[0],mainMenuArgs[1],mainMenuArgs[2])
 
-        socketQueue[0].send(codedQuery)#refresh chat
     
 def publicGrpSelect(usr:str,sckTCP:socket.socket,udpStuff:tuple):pass
 

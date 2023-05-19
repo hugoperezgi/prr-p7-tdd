@@ -1,0 +1,18 @@
+Clients connect to server using TCP protocol:
+
+In order to stablish a connection, they need to provide a user and a password
+in a given format:
+    'user password'
+    <user> must use the format <displayname>#<4-digit tag> (ie Example#1234)
+    <password> should be encripted, as it will be stored as given by user
+
+IMPORTANT: If the user is new, it will be registered using the password given, if the user name already exists, it will check the given password with the stored password.
+
+Once the client is connected, via TCP, it can launch queries in order to perform different actions. 
+
+Whenever it requires a chat log update, the petition will be done by a TCP query but client should give an UDP ip:port address in order to receive the information from the server.
+
+
+Chat logs are stored under the local/ dir as .bin files.
+Registered users can also be found under local/ inside the users.bin
+Existing groups can be found on a file called groups.bin, inside the /local dir

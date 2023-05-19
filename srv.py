@@ -13,7 +13,7 @@ def setUpUnbindedSock(mode: int=0):
     if mode: s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     else: s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-    s.settimeout(1)
+    s.settimeout(10)
     return s
 
 def generateAdmin():
@@ -117,7 +117,9 @@ def handleNewConnection(sck:socket.socket,msg:bytes,LoggedSockets:dict,Registere
     if msg == b'gokys'+b' '+a[0]+b" "+a[1]+b"\n": 
         for s in LoggedSockets: s.send(b'cy@')
         raise SystemExit
-    if sck.fileno() in LoggedSockets: attendQuery(sck,msg,LoggedSockets,RegisteredUsers,ListeningSockets,groups,setUpUnbindedSock())
+    if sck.fileno() in LoggedSockets: 
+        attendQuery(sck,msg,LoggedSockets,RegisteredUsers,ListeningSockets,groups,setUpUnbindedSock())
+        return
     fuck = msg.partition(b' ')[0]
     if fuck in RegisteredUsers: logInUser(sck,msg,LoggedSockets,RegisteredUsers,ListeningSockets)
     else: registerNewUser(sck,msg,LoggedSockets,RegisteredUsers,ListeningSockets)
@@ -147,25 +149,27 @@ def logInUser(sck:socket.socket,msg:bytes,LoggedSockets: dict,RegisteredUsers:di
         return 1
 
 def checkIp(ipstr):
-    ipstr=b''
-    ipstr=ipstr.partition(':')
-    if ipstr[1] == b'': return (False,None)
+    tmp=ipstr.partition(b':')
+    if tmp[1] == b'': return (False,None)
     try: 
-        port=int(ipstr[2].decode('utf8').strip())
+        port=int(tmp[2].decode('utf8').strip())
     except ValueError : return (False,)
-    return (True,(ipstr[0].decode('utf8').strip(),port))
+    return (True,(tmp[0].decode('utf8').strip(),port))
 
 def sendPM(msg,toUser,fromUser):
     toUser=toUser.decode('utf8').strip()
     fromUserS=fromUser.decode('utf8').strip()
-    thisway=toUser+'_'+fromUserS
-    try: f=open("local/"+thisway+".bin","ab",0)
+    thisway=fromUserS+'_'+toUser
+    try: 
+        f=open("local/"+thisway+".bin","rb",0)
+        f.close()
+        f=open("local/"+thisway+".bin","ab",0)
     except FileNotFoundError:
-        theotherway=fromUserS+'_'+toUser
+        theotherway=toUser+'_'+fromUserS
         try: f=open("local/"+theotherway+".bin","ab",0)
         except FileNotFoundError:
             f=open("local/"+theotherway+".bin","xb",0)
-    f.write(fromUser.partition(b'#')[0]+msg+b'\n')
+    f.write(msg)
     f.close()
 
 def sendGrpMsg(msg,toGRP,fromUser):
@@ -186,6 +190,7 @@ def createGrp(name,groups):
     f.close()
     
 def updateChat(sck:socket.socket,msg:bytes,udpsck:socket.socket,ip):
+
     try:
         try:
             a=msg[0].partition(b"@")
@@ -193,12 +198,6 @@ def updateChat(sck:socket.socket,msg:bytes,udpsck:socket.socket,ip):
                 sck.send(b'NotaValidFormat') 
                 raise ValueError
             f=open("local/"+a[2].decode('utf8').strip()+".bin","rb",0)
-        except FileNotFoundError:
-            try:
-                a=a[2].partition(b'_')
-                b=a[2]+a[1]+a[0]
-                f=open("local/"+b.decode('utf8').strip()+".bin","rb",0)
-            except FileNotFoundError: sck.send(b'filenotfound')
 
             try:
                 udpsck.connect(ip)
@@ -207,7 +206,26 @@ def updateChat(sck:socket.socket,msg:bytes,udpsck:socket.socket,ip):
                     if data == b'': break
                     udpsck.send(data)
                 f.close()
-            except:sck.send(b'notAValidIP')
+            except ValueError:sck.send(b'notAValidIP')
+
+
+        except FileNotFoundError:
+            try:
+                a=a[2].partition(b'_')
+                b=a[2]+a[1]+a[0]
+                f=open("local/"+b.decode('utf8').strip()+".bin","rb",0)
+
+                try:
+                    udpsck.connect(ip)
+                    while True:
+                        data = f.read()
+                        if data == b'': break
+                        udpsck.send(data)
+                    f.close()
+                except :sck.send(b'notAValidIP')
+
+            except FileNotFoundError: sck.send(b'filenotfound')
+
     except ValueError:pass
 
 
@@ -243,7 +261,7 @@ def set_proc_name(newname):
     buff.value = newname
     libc.prctl(15, byref(buff), 0, 0, 0)
 
-def runServer():
+def runServer(ip:str|None=None,port:int|None=None):
     # ip=input('Ip to party on: ')
     # port=input('Port: ')
     readSockets,updSocket,registeredUsers,loggedSockets,activeGroups=setUpServer()
@@ -262,4 +280,5 @@ def runServer():
 
 if __name__ == "__main__": 
     set_proc_name(b'Server P7')
-    runServer()
+    if len(sys.argv)>2: runServer(sys.argv[1],int(sys.argv[2]))
+    else: runServer()
