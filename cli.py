@@ -98,12 +98,11 @@ def keepChatAlive(usr:str,trgt:str,codedQuery:bytes,socketQueue:list,mainMenuArg
                     print(r.decode('utf8').strip())
                     input('Press intro to go back to main menu...')
                     mainMenu(mainMenuArgs[0],mainMenuArgs[1],mainMenuArgs[2])
-
     
 def publicGrpSelect(usr:str,sckTCP:socket.socket,udpStuff:tuple):
     os.system('clear')
     target=input("Please introduce the server you want to join: ")
-    codedQuery=encodeUpdateChat(usr,target,udpStuff[1],udpStuff[2])
+    codedQuery=encodeUpdateGroupChat(usr,target,udpStuff[1],udpStuff[2])
     sckTCP.send(codedQuery)
     socketQueue=[sckTCP,udpStuff[0]]
     rdTRD,_,_=select.select(socketQueue,[],[])
