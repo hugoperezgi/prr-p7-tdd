@@ -11,7 +11,6 @@ import unittest
     #  disponga de sockets de Internet. Se valorará en particular la
     #  interacción cliente-servidor entre dos sistemas operativos diferentes.
 
-
     # Canales temáticos: al conectarse un cliente primero elige un canal,
     #  y la conversión sólo se produce entre los clientes conectados a dicho
     #  canal.
