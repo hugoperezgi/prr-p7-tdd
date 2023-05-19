@@ -53,11 +53,17 @@ def privateChatSelect(usr:str,sckTCP:socket.socket,udpStuff:tuple):
 
             keepChatAlive(target,codedQuery,socketQueue,(usr,sckTCP,udpStuff))
         elif(sck.fileno()==socketQueue[0].fileno()):
-            print(sck.recv(2048).decode('utf8').strip())
-            input('Press Intro to continue...')
-            mainMenu(usr,sckTCP,udpStuff)
+            e=sck.recv(2048)
+            if e==b'filenotfound': 
+                sckTCP.send(encodeMsg('Chat: '+usr+' with '+target+'.\n',target))
+                keepChatAlive(target,codedQuery,socketQueue,(usr,sckTCP,udpStuff))
+            else: 
+                print(e.decode('utf8').strip())
+                input('Press Intro to continue...')
+                mainMenu(usr,sckTCP,udpStuff)
 
 def keepChatAlive(usr:str,trgt:str,codedQuery:bytes,socketQueue:list,mainMenuArgs:tuple):
+    socketQueue[0].send(codedQuery)#refresh chat
     while True:
         socketQueue.append(sys.stdin)
         rdToRead,_,_=select.select(socketQueue,[],[],5)

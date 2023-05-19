@@ -49,7 +49,7 @@ def setUpStoredPasswords():
         ls = f.readlines()
         f.close()
         for l in ls: 
-            registerdUsers[l.partition(b" ")[0]] = l.partition(b" ")[2]
+            registerdUsers[l.partition(b" ")[0]] = l.partition(b" ")[2].strip(b'\n')
 
     return registerdUsers
 
@@ -85,7 +85,11 @@ def registerNewUser(sck:socket.socket,msg:bytes,LoggedSockets: dict,RegisteredUs
     if uname[1] != b'#': 
         sck.send(b'Error user must have name#id format')
         return -1
-    if int(uname[2].decode("utf8").strip())/10000 >= 1: 
+    try: 
+        if int(uname[2].decode("utf8").strip())/10000 >= 1: 
+            sck.send(b'Error userid must be a 4-digit')
+            return -1  
+    except ValueError: 
         sck.send(b'Error userid must be a 4-digit')
         return -1  
     
@@ -121,7 +125,7 @@ def handleNewConnection(sck:socket.socket,msg:bytes,LoggedSockets:dict,Registere
 def logInUser(sck:socket.socket,msg:bytes,LoggedSockets: dict,RegisteredUsers:dict,ListeningSockets:list):
     u,_,p=msg.partition(b' ')
 
-    psw=psw.partition(b'\n')
+    psw=p.partition(b'\n')
     while True:
         if psw[1]==b'':break
         psw=psw[0]+psw[2]
