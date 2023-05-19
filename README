@@ -45,3 +45,8 @@ USER MANUAL
 
         Server: Execute the command 'make testServer'
         Client: Execute the command 'make testClient'
+
+
+    In order to quit the chat mode, you need to type :q
+    In order to refresh the chat, you need to type :r or write any msg to chat
+    In order to send any msg you need to write it and then press enter
