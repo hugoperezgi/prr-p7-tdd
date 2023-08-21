@@ -16,3 +16,21 @@ Whenever it requires a chat log update, the petition will be done by a TCP query
 Chat logs are stored under the local/ dir as .bin files.
 Registered users can also be found under local/ inside the users.bin
 Existing groups can be found on a file called groups.bin, inside the /local dir
+
+queries:
+    b'!updatechat@<uid/group> -> <dirIpUDPsocket>'
+     <uid/group>: 
+        user1_user2 (if chat) Where <userX> is <displayName#tag> for user X
+        groupName_group (if group) Must add b'_group' to groupName
+     <dirIpUDPsocket>:
+        '127.0.0.1:port' UDP dir serveer will send chat logs to
+    b'!msg-<msgContent> -> <target>
+     <msgContent>:
+        body of the msg, should addd the username as a prefix (Uname:message)
+     <target>:
+        displayname#tag (if private msg)
+        groupName (if group)
+    b'!create -> <groupName>'
+     <groupName>:
+        Name of the group, cant be repeated with existing groups
+    

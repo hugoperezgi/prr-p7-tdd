@@ -29,6 +29,7 @@ def encodeUpdateChat(user:str,target:str,ipUDP:str='127.0.0.1',portUDP:int=7070)
     return b'!updatechat@'+user.encode('utf8')+b'_'+target.encode('utf8')+b' -> '+ipUDP.encode('utf8')+b':'+str(portUDP).encode('utf8')
 
 def set_proc_name(newname):
+    # pass
     from ctypes import cdll, byref, create_string_buffer
     libc = cdll.LoadLibrary('libc.so.6')
     buff = create_string_buffer(len(newname)+1)
@@ -120,7 +121,7 @@ def publicGrpSelect(usr:str,sckTCP:socket.socket,udpStuff:tuple):
         elif(sck.fileno()==socketQueue[0].fileno()):
             e=sck.recv(2048)
             if e==b'filenotfound': 
-                print('shitshow\n')
+                print(e.decode('utf8').strip())
                 input('Press Intro to continue...')
                 mainMenu(usr,sckTCP,udpStuff)
             else: 
@@ -169,8 +170,8 @@ def mainMenu(usr:str,sckTCP:socket.socket,udpStuff:tuple):
                         case 2:publicGrpSelect(usr,sckTCP,udpStuff)
                         case 3:createGrp(usr,sckTCP,udpStuff)
                         case 4: raise SystemExit
-                        case _: print('Learn how to count. Fucking moron.')
-                except ValueError: print('Someone is a dumbfuck')
+                        case _: print('1,2,3,4')
+                except ValueError: print("That's not a number.")
                 input('Press Enter for another go, I believe in you...')
 
 

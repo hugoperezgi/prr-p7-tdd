@@ -124,7 +124,7 @@ def handleNewConnection(sck:socket.socket,msg:bytes,LoggedSockets:dict,Registere
     if fuck in RegisteredUsers: logInUser(sck,msg,LoggedSockets,RegisteredUsers,ListeningSockets)
     else: registerNewUser(sck,msg,LoggedSockets,RegisteredUsers,ListeningSockets)
 
-def logInUser(sck:socket.socket,msg:bytes,LoggedSockets: dict,RegisteredUsers:dict,ListeningSockets:list):
+def logInUser(sck:socket.socket,msg:bytes,LoggedSockets:dict,RegisteredUsers:dict,ListeningSockets:list):
     u,_,p=msg.partition(b' ')
 
     psw=p.partition(b'\n')
@@ -237,11 +237,11 @@ def attendQuery(sck:socket.socket,msg:bytes,LoggedSockets: dict,RegisteredUsers:
     else:
         msg=msg.partition(b" -> ") # <msg> -> <userid/grpid>
         if(msg[1] != b" -> "): 
-            sck.send(b'wrongFormatYouDumbfuck')
+            sck.send(b'wrongFormat')
         if(msg[0].startswith(b'!msg')): 
             if(msg[2] in RegisteredUsers): sendPM(msg[0].removeprefix(b'!msg-'),msg[2],LoggedSockets[sck.fileno()])
             elif(msg[2] not in groups): sendGrpMsg(msg[0].removeprefix(b'!msg-'),msg[2])               
-            else: sck.send(b'invalidChatYouDumbfuck')
+            else: sck.send(b'invalidChat')
         elif(msg[0].startswith(b'!create')):
             if(msg[2] in groups): sck.send(b'groupAlreadyExists')
             if msg[2].partition(b'#')[1] == b'#':  sck.send(b'NotaValidGrpName')
@@ -252,7 +252,7 @@ def attendQuery(sck:socket.socket,msg:bytes,LoggedSockets: dict,RegisteredUsers:
             v,ip=checkIp(msg[2])                 # <user1_user2> (if chat) <grpname_group> (if group)
             if not v: sck.send(b'notAValidIP')
             else:updateChat(sck,msg,udpsck,ip)
-        else: sck.send(b'invalidMSGYouDumbfuck')
+        else: sck.send(b'invalidMSG')
 
 def set_proc_name(newname):
     from ctypes import cdll, byref, create_string_buffer

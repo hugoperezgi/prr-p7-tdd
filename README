@@ -14,6 +14,10 @@ USER MANUAL
             <ip>: A valid ip address (Default is 127.0.0.1)
             <port>: A valid port (Default is 6969)
 
+        To shutdown the server, use the following command:
+
+            make killServer
+
     Launch CLIENT
 
         In order to launch the client, you can use two of the default clients:
@@ -47,6 +51,9 @@ USER MANUAL
         Client: Execute the command 'make testClient'
 
 
-    In order to quit the chat mode, you need to type :q
-    In order to refresh the chat, you need to type :r or write any msg to chat
-    In order to send any msg you need to write it and then press enter
+    In order to quit the chat mode, you need to type :q (+enter)
+    In order to refresh the chat, you need to type :r or write any msg to chat (+enter)
+    In order to send any msg you need to write it (one in the chat room) and then press enter 
+    it should appear along the chat history once it's processed.
+
+The query structure can be found in ARCHITECTURE

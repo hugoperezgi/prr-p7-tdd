@@ -38,7 +38,7 @@ class TestServer(unittest.TestCase):
     def test_setUpStoredPasswords(self):
         expected={}
         a=generateAdmin()
-        expected[a[0]]=a[1] + b'\n'
+        expected[a[0]]=a[1]
         self.assertEqual(expected[a[0]],setUpStoredPasswords()[a[0]])
 
         with self.assertRaises(FileExistsError):
@@ -51,7 +51,7 @@ class TestServer(unittest.TestCase):
         exp[usr]=pss
         saveCli(usr,pss)
         try1=setUpStoredPasswords()
-        self.assertEqual(exp[usr]+b'\n',try1[usr])
+        self.assertEqual(exp[usr],try1[usr])
 
     def test_setUpServer(self):
         self.assertIsInstance(self.listenSck[0],socket.socket().__class__)
@@ -80,7 +80,7 @@ class TestServer(unittest.TestCase):
         s,elo=getNewConnection(self.listenSck[0])
         self.assertEqual(registerNewUser(s,elo,self.loggedSock,self.registerdUsers,self.listenSck),0)
         try1=setUpStoredPasswords()
-        self.assertEqual(b'shietpassword'+b'\n',try1[b'hello#2345'])
+        self.assertEqual(b'shietpassword',try1[b'hello#2345'])
 
     def test_logInUser(self):
         temp=setUpUnbindedSock(1)
