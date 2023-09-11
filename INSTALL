@@ -2,5 +2,4 @@ HOW TO INSTALL REQUIRED THINGYS
 
     Run the following command on console: make elo
 
-    This should install python, as it's required to run either the server or the 
-    client.
+    This should install python, as it's required to run either the server or the client.
